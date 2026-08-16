@@ -60,15 +60,17 @@ No telemetry is enabled by default. Update checks disclose only what is technica
 
 ## 3. Data classes and handling
 
-| Class | Examples | Default location | Normal exposure |
-|---|---|---|---|
-| Raw evidence | Complete chats, tool results, attachments | Encrypted private store | Read-only, on demand |
-| Durable memory | Requirements, preferences, lessons, decisions | Encrypted store and selected Markdown projection | Task-aware retrieval and Obsidian |
-| Private provenance | Source client, source record ID, original timestamps | Encrypted private store | Evidence review and internal repair only |
-| Search material | Embeddings, FTS indexes, ranking feedback | Encrypted private store | Retrieval engine only |
-| Operational metadata | Jobs, audits, health, repairs, approvals | Encrypted private store | Status and review views |
-| Recovery material | Protected key, user recovery key | Windows-protected/user-controlled locations | Recovery operations only |
-| Portable export | Selected Markdown, JSONL, attachments, graph, checksums | User-selected destination | Explicit user action and warning |
+| Class ID | Class | Examples | Default location | Normal exposure |
+|---|---|---|---|---|
+| DC-1 | Raw evidence | Complete chats, tool results, attachments | Encrypted private store | Read-only, on demand |
+| DC-2 | Durable memory | Requirements, preferences, lessons, decisions | Encrypted store and selected Markdown projection | Task-aware retrieval and Obsidian |
+| DC-3 | Private provenance | Source client, source record ID, original timestamps | Encrypted private store | Evidence review and internal repair only |
+| DC-4 | Search material | Embeddings, FTS indexes, ranking feedback | Encrypted private store | Retrieval engine only |
+| DC-5 | Operational metadata | Jobs, audits, health, repairs, approvals | Encrypted private store | Status and review views |
+| DC-6 | Recovery material | Protected key, user recovery key | Windows-protected/user-controlled locations | Recovery operations only |
+| DC-7 | Portable export | Selected Markdown, JSONL, attachments, graph, checksums | User-selected destination | Explicit user action and warning |
+
+Other documents cite a data class by its `DC-*` label rather than restating its handling rules.
 
 Provider neutrality applies to durable memories, reports, graph facts, and ranking signals. Private provenance keeps source identity because deduplication and evidence verification would otherwise be unreliable. Source identity is never used to create client-specific truth or privilege one provider's statement merely because of its label.
 

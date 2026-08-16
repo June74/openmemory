@@ -8,6 +8,7 @@ OpenMemory is currently documentation-only. Implementation contributions should 
 2. Open or reference an issue that defines the intended behavior and acceptance evidence.
 3. Do not mix unrelated changes in one branch.
 4. Never place real credentials, private transcripts, or personal memory databases in the repository, including test fixtures.
+5. Read [Compatibility](docs/COMPATIBILITY.md) and [Identifiers](docs/IDENTIFIERS.md).
 
 ## Development workflow
 
@@ -18,6 +19,14 @@ OpenMemory is currently documentation-only. Implementation contributions should 
 - Run focused checks and the complete affected suite.
 - Request specification review before code-quality and security review.
 - Submit changes through a pull request. Direct implementation commits to `main` are not allowed after the initial documentation baseline.
+
+### Required checks
+
+Checks are not yet enforced by GitHub. The intended ruleset is recorded in [.github/branch-protection.md](.github/branch-protection.md). Until it is enabled in Wave C, every change instead receives an independent `codex exec` review before integration.
+
+### License headers
+
+Source files added from Wave B onward carry an Apache-2.0 header. Wave A adds no source files. `LICENSE` and `NOTICE` remain authoritative.
 
 ## Developer Certificate of Origin
 
