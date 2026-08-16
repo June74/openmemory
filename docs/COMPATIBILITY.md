@@ -32,14 +32,18 @@ A change is breaking when an existing peer that was previously accepted would be
 
 A change that is not breaking under this definition does not require a contract version increment. A change that is breaking always does.
 
+For the two SemVer-versioned surfaces — the product and the Obsidian plugin — "breaking" instead follows SemVer 2.0.0's own definition: a change that removes or alters previously available public behavior in a way an existing user or a dependent build could not tolerate requires a MAJOR version increment, not an integer increment. The MCP protocol, named-pipe envelope, database schema, event envelope, projection protocol, and portable export format use the integer definition above; the product and the Obsidian plugin use SemVer MAJOR instead.
+
 ## §3 Support windows
 
 Support windows describe how much of a surface's version history the service must keep accepting, not how long a version is merely documented.
 
-- The service accepts the **current and immediately previous** integer for the MCP protocol and the named-pipe envelope. Anything older is rejected with a version-mismatch error that names the supported range. A rejected version is never handled by best-effort parsing.
-- The **database schema is forward-only**. The service refuses to open a database whose schema integer exceeds the value the running binary knows. This refusal is what makes rollback after a failed update safe: an older binary declines rather than corrupting newer data.
+- The service must accept the **current and immediately previous** integer for the MCP protocol and the named-pipe envelope. Anything older must be refused with a version-mismatch error that names the supported range. A rejected version must never be handled by best-effort parsing.
+- The **database schema is forward-only**. The service must refuse to open a database whose schema integer exceeds the value the running binary knows. This refusal is what makes rollback after a failed update safe: an older binary declines rather than corrupting newer data. In the other direction, the service must migrate forward from any schema integer its running binary still knows a migration path for. A database whose schema integer is older than the earliest migration the binary knows cannot be upgraded in place; recovering it requires restoring from a backup instead.
 - The **portable export format** is readable by every later version. This is the promise behind `D-083`, so it has no support window; support is permanent.
-- The **event envelope** and **projection protocol** follow the current-and-previous rule.
+- The **event envelope** and **projection protocol** must follow the current-and-previous rule.
+- The **product** (SemVer) must support upgrading directly from any prior MINOR or PATCH release within the same MAJOR line. Upgrading across a MAJOR boundary may require an intermediate step and is not a support-window guarantee.
+- The **Obsidian plugin** (SemVer) must support the range of Obsidian application versions declared by its `minAppVersion` in `manifest.json`, and must support upgrading directly from any prior plugin release within the same MAJOR line, consistent with the product rule above.
 
 ## §4 Pre-1.0 policy
 
@@ -47,9 +51,17 @@ Before product `1.0.0`, every contract may break without a support window, becau
 
 ## §5 Relationship to automatic updates
 
-Automatic installation is permitted only for a product MINOR or PATCH release in which **no contract integer increases**. Any contract increment, and any product MAJOR release, requires explicit approval.
+Automatic installation is permitted only when **all** of the following hold. Failing any one of them requires explicit approval.
 
-This is a deliberately stricter reading of decision `D-071` than its literal wording. `D-071` requires approval for "major or permission-changing updates," which leaves the boundary to judgment. This policy replaces that judgment call with a mechanical test: compare the contract version integers in §1 before and after the candidate update, and if any of them increases, the update is not eligible for automatic installation regardless of what the product's SemVer field does. A consequence worth stating explicitly is that a product PATCH release can still require approval — for example, a patch that carries a database schema migration increments the database schema integer, so it fails the no-increase test and is not auto-installable even though it is a patch by SemVer.
+1. The release is a product MINOR or PATCH — never a product MAJOR.
+2. No contract integer in §1 increases.
+3. The update does not change permissions or expand authority.
+4. The update does not change key handling.
+5. The update performs no irreversible migration.
+
+Condition 2 — the contract-integer test — is an **additional** gate, not a replacement for the others. It supplements decision `D-071`'s permission-change judgment; it does not substitute for it. `D-071` requires approval for "major or permission-changing updates," and that judgment call still applies in full even when no contract integer increases: a permission-expanding patch with unchanged contract integers still requires approval under condition 3, it does not qualify for automatic installation just because it passes the mechanical integer test. Approval requirements for key-handling changes and irreversible migrations (conditions 4 and 5) come from `DATA_AND_PRIVACY.md`, which states them directly.
+
+A consequence worth stating explicitly is that a product PATCH release can still require approval — for example, a patch that carries a database schema migration increments the database schema integer, so it fails condition 2 and is not auto-installable even though it is a patch by SemVer.
 
 ## §6 Freeze status
 

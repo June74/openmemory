@@ -40,8 +40,35 @@ UUIDv7 was chosen over ULID for every other identifier in this table. Both are t
 
 ## 3. Stability rules
 
-Every runtime identifier in §2 must satisfy these three rules:
+The three stability rules below do not apply uniformly to every runtime identifier in §2. Runtime identifiers fall into three scoped classes, and each class has its own applicable rules.
+
+### Class A — entity identifiers
+
+`event_id`, `project_id`, `repository_id`, `installation_id`, `private_store_id`, `vault_id`.
+
+All three rules apply unchanged:
 
 1. **Never reused.** An identifier is never reused, even after the thing it names is deleted. A deleted project's `project_id` is retired, not recycled onto a later, unrelated project.
 2. **Never derived from mutable data.** An identifier is never derived from mutable data. Paths, folder names, project names, and branch names all change; identifiers must survive rename, move, and hardware transfer.
 3. **Never encodes user content or a secret value.** An identifier must not encode user content or any secret value. This follows from the secret-handling rules in `DATA_AND_PRIVACY.md §4`: an identifier is a value that gets logged, exported, and displayed, so anything encoded in it is effectively exposed on every one of those surfaces.
+
+### Class B — content fingerprints
+
+`content_hash`.
+
+Rules 1 and 2 deliberately do **not** apply to this class. A content hash is intentionally deterministic and derived from content — identical content must produce an identical hash, because that is exactly what makes deduplication and idempotency work. This is intended behavior, not an exception that needs fixing. The applicable rule instead is:
+
+- **Never fingerprints an unredacted secret.** A fingerprint is computed only over content that has already passed pre-persistence secret redaction, so it never fingerprints a secret value.
+
+### Class C — private provenance identifiers
+
+`source_record_id`.
+
+Rule 3's stated reason does not hold for this class. `DATA_AND_PRIVACY.md` classifies source record IDs as `DC-3` private provenance: encrypted, exposed only for evidence review and internal repair, and specifically **not** logged, exported, or displayed the way Class A identifiers are. Rules 1 and 2 still apply:
+
+1. **Never reused.** An identifier is never reused, even after the thing it names is deleted.
+2. **Never derived from mutable data.** An identifier is never derived from mutable data; it must survive rename, move, and hardware transfer.
+
+Rule 3 is replaced for this class with:
+
+- **Must not leave the encrypted private store**, except during evidence review or internal repair.

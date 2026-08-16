@@ -119,6 +119,7 @@ Narrow additions only. No rewrites, no reformatting.
 - `DATA_AND_PRIVACY.md` — add canonical `DC-1`…`DC-7` labels to the existing data-class table so other documents can cite a class instead of restating it. **The table's content does not change**; only a label column is added.
 - `DECISION_REGISTER.md` — record decisions A-2 and A-3 as new `D-*` entries. A-1 and A-4 are process choices, not product decisions, and stay in this spec.
 - `README.md` — link `COMPATIBILITY.md` and `IDENTIFIERS.md`.
+- `.gitignore` — gained a `.superpowers/` entry to keep agent execution scratch (ledgers, briefs, review packages) out of commits. This edit fell outside this spec's permitted-edit list above; it is documented here rather than reverted, per the Task 7 review finding.
 
 ## 5. Verification
 
@@ -127,9 +128,11 @@ Documentation has no unit tests, so the test-first discipline applies to the *ch
 | Check | Command | Fails before because |
 |---|---|---|
 | CODEOWNERS validity | `gh api repos/June74/openmemory/codeowners/errors` | The file does not exist |
-| Issue-template YAML | Parsed locally, then confirmed server-side after push | GitHub validates issue forms only on the pushed ref |
+| Issue-template YAML | Parsed locally (structural check only: file count, tabs, presence of a `name:` field — not a schema parse), then confirmed server-side after push | GitHub validates issue-form schema only on the pushed ref; the local check cannot substitute for it |
 | Repo-local Markdown links | Bash link check, repository-internal links only | New documents are linked before they exist |
 | Independent review | `codex exec` spec and quality review of the diff | — |
+
+The local issue-template check is structural, not a schema validator: it confirms the expected files exist, use tabs consistently, and each declares a `name:` field. It does not parse the files as YAML and does not confirm they satisfy GitHub's issue-form schema. GitHub issue-form schema validation is only possible server-side, on a pushed ref — there is no equivalent local tool. The local check narrows obvious mistakes before push; it does not prove the templates render correctly.
 
 **Two constraints carried from prior setbacks.** The link check runs in bash, not a PowerShell pipeline, because [SET-20260816-001](../../operations/setbacks/SET-20260816-001-link-check-parser.md) was a PowerShell parse failure. It checks repository-internal links only, because [SET-20260816-002](../../operations/setbacks/SET-20260816-002-link-check-sandbox.md) was the sandbox blocking outbound requests. Repeating either would be a self-inflicted setback.
 
