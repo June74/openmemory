@@ -1,0 +1,37 @@
+name: Feature request
+description: Propose a capability or a change to approved behavior.
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Version 1 scope is fixed and several capabilities are explicitly
+        excluded. Check the `X-*` exclusion list in the decision register
+        before opening this request.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: The user-facing problem, described without a proposed solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: input
+    id: decision
+    attributes:
+      label: Related decision or requirement
+      description: The D-*, F-*, or REQ-* identifier this relates to, or "none".
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope confirmation
+      options:
+        - label: I checked the X-* exclusion list and this is not already excluded from version 1.
+          required: true
