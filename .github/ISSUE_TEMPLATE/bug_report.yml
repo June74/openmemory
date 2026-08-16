@@ -1,0 +1,46 @@
+name: Bug report
+description: Report incorrect behavior in OpenMemory or its documentation.
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        OpenMemory is in its planning and foundation stage. No supported binary
+        exists yet, so most reports at this point concern documentation.
+
+        Never paste credentials, API keys, private transcripts, or personal
+        memory content into this form. Suspected vulnerabilities are reported
+        privately instead — see the security policy.
+  - type: input
+    id: revision
+    attributes:
+      label: Affected revision
+      description: The commit SHA or tag where you observed this.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Exact commands or navigation. Redact private paths and values.
+    validations:
+      required: true
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Confirmation
+      options:
+        - label: This report contains no secret value, credential, or private memory content.
+          required: true

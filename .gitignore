@@ -23,6 +23,9 @@ Thumbs.db
 .worktrees/
 worktrees/
 
+# Agent execution scratch (ledgers, briefs, review packages)
+.superpowers/
+
 # Local OpenMemory data (never commit)
 *.db
 *.db-shm

@@ -31,6 +31,8 @@ The first public release is planned for Windows 11 x64 and will use a per-user M
 - [Staged implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Glossary](docs/GLOSSARY.md)
+- [Compatibility](docs/COMPATIBILITY.md)
+- [Identifiers](docs/IDENTIFIERS.md)
 - [Agent working agreement](AGENTS.md)
 
 ## Project principles

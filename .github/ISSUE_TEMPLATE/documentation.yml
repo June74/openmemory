@@ -1,0 +1,23 @@
+name: Documentation issue
+description: Report unclear, incorrect, or missing documentation.
+labels: ["documentation", "needs-triage"]
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Document and section
+      description: For example, docs/ARCHITECTURE.md and the section heading.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or unclear
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested correction
+    validations:
+      required: false

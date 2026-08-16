@@ -1,0 +1,21 @@
+# OpenMemory code owners.
+#
+# AGENTS.md requires that shared files are owned by the root integrator or a
+# named contract owner. Every path below has a named owner.
+
+# Default owner for everything not matched more specifically.
+*                     @June74
+
+# Licensing, security policy, and the agent agreement.
+/LICENSE              @June74
+/NOTICE               @June74
+/SECURITY.md          @June74
+/CODE_OF_CONDUCT.md   @June74
+/CONTRIBUTING.md      @June74
+/AGENTS.md            @June74
+
+# Repository configuration and contributor templates.
+/.github/             @June74
+
+# Approved product documents and frozen contracts.
+/docs/                @June74
