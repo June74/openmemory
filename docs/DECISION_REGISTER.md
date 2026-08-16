@@ -6,6 +6,9 @@ Related documents:
 
 - [Product requirements](PRODUCT_REQUIREMENTS.md)
 - [Data and privacy design](DATA_AND_PRIVACY.md)
+- [Stable identifiers](IDENTIFIERS.md)
+
+`D-*`, `X-*`, and `F-*` numbers are allocated monotonically: a new entry takes the next unused number in its series and is filed in the section its subject belongs to, which means a section may contain entries from more than one numeric range. The per-section grouping visible in the early numbers is historical, not a rule. An assigned identifier is never reused or renumbered, because other documents cite it. See [Stable identifiers](IDENTIFIERS.md).
 
 ## 1. Approved product decisions
 
@@ -33,7 +36,7 @@ Related documents:
 | D-017 | Distribute the Windows application through a per-user MSI installer; portable export moves memory but is not the primary runnable installation. | Startup registration, repair, upgrade, and uninstall have one conventional Windows lifecycle while transfer remains a separate data workflow. |
 | D-018 | Use free checksums and provenance attestations during development, apply for qualifying free open-source signing, and consider a roughly $10/month Microsoft signing service only for public v1 with separate spending approval. Automatic installation requires a signature or signed attestation anchored to a pinned trusted project identity; a checksum is integrity evidence only. | Development remains free and no paid service is activated implicitly; unsigned development builds are manual-install only and may receive Windows reputation warnings. |
 | D-019 | Sideload the Obsidian plugin during development/private beta, then submit the hardened plugin to the Obsidian community directory for public v1. | Core terminal operation cannot depend on external plugin-review timing. |
-| D-090 | Version the product with SemVer and each contract surface with an independent integer, as specified in [Compatibility](COMPATIBILITY.md), with one recorded exception: the Obsidian plugin uses SemVer, not an integer, because Obsidian's `manifest.json` requires a SemVer `version` field and a `minAppVersion` field. | A database migration does not force a major product release, while the pipe can reject on a protocol integer. Automatic installation requires that no contract integer increased. |
+| D-090 | Version the product with SemVer and each contract surface with an independent integer, as specified in [Compatibility](COMPATIBILITY.md), with one recorded exception: the Obsidian plugin uses SemVer, not an integer, because Obsidian's `manifest.json` requires a SemVer `version` field and a `minAppVersion` field. | A database migration does not force a major product release, while the pipe can reject on a protocol integer. No contract integer increasing is one necessary condition for automatic installation, not the whole test; `D-071`'s approval conditions continue to apply in full, as specified in [Compatibility](COMPATIBILITY.md). |
 | D-091 | Document the branch-protection ruleset in Stage 0 Wave A but enable it in Wave C, once continuous integration produces checks worth requiring. | Until then, `main` is protected by process rather than by GitHub, and independent review is performed locally with `codex exec` before integration. |
 
 ## 3. Approved capture and processing decisions
