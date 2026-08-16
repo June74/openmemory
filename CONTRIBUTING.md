@@ -1,0 +1,44 @@
+# Contributing to OpenMemory
+
+OpenMemory is currently documentation-only. Implementation contributions should wait until the Stage 0 contracts and repository-grounded threat model have been merged.
+
+## Before opening a change
+
+1. Read the [product requirements](docs/PRODUCT_REQUIREMENTS.md), [architecture](docs/ARCHITECTURE.md), and [agent agreement](AGENTS.md).
+2. Open or reference an issue that defines the intended behavior and acceptance evidence.
+3. Do not mix unrelated changes in one branch.
+4. Never place real credentials, private transcripts, or personal memory databases in the repository, including test fixtures.
+
+## Development workflow
+
+- Branch from `main` using `codex/<short-description>`.
+- Use an isolated Git worktree for implementation.
+- Freeze shared interfaces before parallel implementation begins.
+- Add tests before or with behavior changes.
+- Run focused checks and the complete affected suite.
+- Request specification review before code-quality and security review.
+- Submit changes through a pull request. Direct implementation commits to `main` are not allowed after the initial documentation baseline.
+
+## Developer Certificate of Origin
+
+Every commit must include a `Signed-off-by` line certifying the [Developer Certificate of Origin 1.1](https://developercertificate.org/). Sign a commit with:
+
+```powershell
+git commit -s -m "Describe the change"
+```
+
+The sign-off certifies that you have the right to submit the contribution under this repository's license. It is not a copyright assignment.
+
+## Documentation
+
+Use plain language, define unfamiliar terms, distinguish planned behavior from implemented behavior, and link to the decision or evidence that supports a claim.
+
+## Pull-request evidence
+
+A pull request should state:
+
+- what changed and why;
+- which requirements and decisions it satisfies;
+- security or privacy effects;
+- commands and real user paths used for verification;
+- remaining limitations or deferred work.

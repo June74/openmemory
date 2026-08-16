@@ -1,0 +1,45 @@
+# Build output
+bin/
+obj/
+dist/
+coverage/
+TestResults/
+
+# Dependencies and caches
+node_modules/
+.pnpm-store/
+.cache/
+
+# IDE and operating system
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Worktrees
+.worktrees/
+worktrees/
+
+# Local OpenMemory data (never commit)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.sqlcipher
+*.key
+*.pem
+*.pfx
+*.p12
+*.recovery
+.env
+.env.*
+!.env.example
+local-data/
+private-data/
+backups/
+exports/
+quarantine/
