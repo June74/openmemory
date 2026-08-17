@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: build-and-test
+    runs-on: windows-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Verify formatting
+        run: dotnet format OpenMemory.sln --verify-no-changes
+
+      - name: Restore
+        run: dotnet restore OpenMemory.sln
+
+      - name: Build
+        run: dotnet build OpenMemory.sln --no-restore --nologo
+
+      - name: Run tests
+        run: dotnet test OpenMemory.sln --no-build --nologo
+
+      - name: Assert minimum discovered test count
+        shell: pwsh
+        run: |
+          $expected = 4
+          $listed = dotnet test OpenMemory.sln --no-build --nologo --list-tests
+          $count = ($listed | Where-Object { $_ -match '^\s+\S+\.\S+\.\S+$' }).Count
+          Write-Host "Discovered $count tests (floor $expected)"
+          if ($count -lt $expected) {
+            throw "Discovered $count tests, expected at least $expected. Either tests were removed, or test discovery is broken. dotnet test exits 0 in both cases, which is why this assertion exists."
+          }
+
+  plugin:
+    name: plugin
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/OpenMemory.ObsidianPlugin
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check
+        run: pnpm run typecheck
+
+  docs:
+    name: docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Check repository-internal links
+        run: bash tools/check-links.sh
