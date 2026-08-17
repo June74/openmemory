@@ -119,7 +119,7 @@ Each check runs before its change to observe it fail first, where that is possib
 
 - Any product behavior. No `.cs` or `.ts` file gains logic.
 - A TypeScript formatter (C-6, Stage 6).
-- Dependabot version-update configuration. `dependency-review-action` covers pull-request-time review, which is what Stage 0 asks for; scheduled dependency bumps are a separate operational decision.
+- ~~Dependabot version-update configuration. `dependency-review-action` covers pull-request-time review, which is what Stage 0 asks for; scheduled dependency bumps are a separate operational decision.~~ **Superseded:** this exclusion was revisited after this wave produced concrete evidence that pinned actions rot silently — five actions were found one to three majors behind, discovered only incidentally via a deprecation warning in an unrelated log. `.github/dependabot.yml` (github-actions ecosystem only) is now in scope to catch this going forward.
 - Code signing and attestation. `D-018` and `F-007` place these at Stage 8, with explicit approval required before any paid service.
 - The threat model and the four frozen security contracts — Wave D, `F-010`.
 - Release publishing. This wave uploads workflow artifacts; it does not create GitHub Releases or tags.
