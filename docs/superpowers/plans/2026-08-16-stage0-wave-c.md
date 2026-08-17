@@ -426,8 +426,13 @@ Change the status blockquote at the top from "not yet enabled" to enabled, dated
 
 These are the job names from [`ci.yml`](workflows/ci.yml). Branch protection
 matches required checks by name, so **renaming a job here or in the workflow
-silently un-enforces it** — a required check that never reports simply never
-blocks. Any job rename must update both files together.
+without updating the other blocks merging instead of un-enforcing anything**
+— GitHub fails closed: a required context that never reports leaves the pull
+request waiting on it indefinitely, blocking the merge rather than silently
+letting it through. This differs from a job that reports as *skipped*, which
+GitHub treats as passing; a renamed job's old context reports nothing at
+all, so the two behave oppositely. Any job rename must update both files
+together to avoid a permanently blocked pull request.
 
 | Check | What it verifies |
 |---|---|
@@ -457,7 +462,8 @@ git add .github/branch-protection.md
 git commit -s -m "Record the required checks from the CI workflow
 
 Names the six job names branch protection will require, and states
-that renaming a job silently un-enforces it unless both files change."
+that renaming a job without updating both files blocks merging
+(GitHub fails closed) rather than silently un-enforcing the check."
 ```
 
 ---
@@ -481,9 +487,10 @@ gh api repos/June74/openmemory/branches/main/protection 2>&1 | head -3
 
 Expected: non-provider patterns and validity checks `disabled`; protection returns 404 "Branch not protected".
 
-- [ ] **Step 2: Enable the two secret-scanning settings**
+- [ ] ~~**Step 2: Enable the two secret-scanning settings**~~ **Superseded — not available on this repository.** Non-provider patterns and validity checks are GitHub Secret Protection features; `advanced_security` is absent from this repository's `security_and_analysis` response. The PATCH below returns HTTP 200 and changes nothing, and the toggles do not render in settings. See the availability note in the design spec §3. The detection gap is covered by the `secret-scan` job instead.
 
 ```bash
+# Historical: originally intended to run, left here as the superseded record.
 gh api -X PATCH repos/June74/openmemory \
   -f 'security_and_analysis[secret_scanning_non_provider_patterns][status]=enabled' \
   -f 'security_and_analysis[secret_scanning_validity_checks][status]=enabled'
@@ -595,7 +602,7 @@ If any step failed unexpectedly, create a setback record in `docs/operations/set
 3. The downloaded artifact's SHA-256 verifies against the archive.
 4. `.github/branch-protection.md` names the six real job names.
 5. Branch protection active on `main` with those six contexts, `strict: true`, `enforce_admins: true`, force-pushes and deletions disabled.
-6. Non-provider patterns and validity checks enabled.
+6. ~~Non-provider patterns and validity checks enabled.~~ **Superseded:** confirmed not available on this repository (not a provisioned Secret Protection tier); the detection gap is covered by the `secret-scan` job instead.
 7. Every commit DCO-signed; no secret-shaped content.
 8. Codex independent review findings resolved with evidence.
 9. No product behavior added beyond whitespace-only formatting changes, if any.

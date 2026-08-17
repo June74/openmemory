@@ -139,6 +139,23 @@ jobs:
       - name: Package and checksum
         shell: pwsh
         run: |
+          $expectedDirs = @(
+            "artifacts/publish/OpenMemory.Service",
+            "artifacts/publish/OpenMemory.Cli",
+            "artifacts/publish/OpenMemory.McpBridge"
+          )
+          $problems = @()
+          foreach ($dir in $expectedDirs) {
+            if (-not (Test-Path $dir)) {
+              $problems += "missing: $dir"
+            } elseif (-not (Get-ChildItem -Path $dir -Recurse -File -ErrorAction SilentlyContinue)) {
+              $problems += "empty: $dir"
+            }
+          }
+          if ($problems.Count -gt 0) {
+            throw "Publish output incomplete, refusing to package:`n$($problems -join "`n")"
+          }
+
           New-Item -ItemType Directory -Force -Path artifacts/out | Out-Null
           Compress-Archive -Path artifacts/publish/* -DestinationPath artifacts/out/openmemory-dev.zip
           $hash = Get-FileHash -Algorithm SHA256 -Path artifacts/out/openmemory-dev.zip
@@ -159,6 +176,7 @@ jobs:
           format: cyclonedx-json
           output-file: artifacts/out/openmemory-sbom.cyclonedx.json
           upload-artifact: false
+          syft-version: "v1.51.0"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7

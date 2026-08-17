@@ -37,8 +37,13 @@ Applied to `main`:
 
 These are the job names from [`ci.yml`](workflows/ci.yml). Branch protection
 matches required checks by name, so **renaming a job here or in the workflow
-silently un-enforces it** — a required check that never reports simply never
-blocks. Any job rename must update both files together.
+without updating the other blocks merging instead of un-enforcing anything**
+— GitHub fails closed: a required context that never reports leaves the pull
+request waiting on it indefinitely, blocking the merge rather than silently
+letting it through. This differs from a job that reports as *skipped*, which
+GitHub treats as passing; a renamed job's old context reports nothing at
+all, so the two behave oppositely. Any job rename must update both files
+together to avoid a permanently blocked pull request.
 
 | Check | What it verifies |
 |---|---|
@@ -46,5 +51,10 @@ blocks. Any job rename must update both files together.
 | `plugin` | The Obsidian plugin installs from the committed lockfile and type-checks |
 | `docs` | Every repository-internal Markdown link resolves |
 | `secret-scan` | gitleaks finds no secret in the full history |
-| `dependency-review` | No vulnerable or incompatible-licence dependency is introduced |
+| `dependency-review` | No known-vulnerable dependency is introduced by the pull request |
 | `artifact` | Publish, checksum, and SBOM generation succeed |
+
+Licence policy is not configured for `dependency-review`: the action runs
+without `allow-licenses`/`deny-licenses` inputs, so it checks vulnerabilities
+only. Configuring licence enforcement requires first deciding which licences
+are acceptable — a product decision that has not been made.
