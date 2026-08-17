@@ -1,8 +1,7 @@
 # Branch protection
 
-> **Status:** not yet enabled. This document records the ruleset that Wave C
-> will apply to `main` once continuous integration produces checks worth
-> requiring.
+> **Status:** The required checks below are now real and verified green.
+> Enablement to GitHub is pending Task 5.
 
 ## Why it is deferred
 
@@ -31,5 +30,16 @@ Applied to `main`:
 
 ## Required checks
 
-To be filled in by Wave C with the exact job names from the CI workflow.
-Wave C is not complete until this section names real, passing checks.
+These are the job names from [`ci.yml`](workflows/ci.yml). Branch protection
+matches required checks by name, so **renaming a job here or in the workflow
+silently un-enforces it** — a required check that never reports simply never
+blocks. Any job rename must update both files together.
+
+| Check | What it verifies |
+|---|---|
+| `build-and-test` | C# formatting, restore, build, tests, and the minimum discovered-test count |
+| `plugin` | The Obsidian plugin installs from the committed lockfile and type-checks |
+| `docs` | Every repository-internal Markdown link resolves |
+| `secret-scan` | gitleaks finds no secret in the full history |
+| `dependency-review` | No vulnerable or incompatible-licence dependency is introduced |
+| `artifact` | Publish, checksum, and SBOM generation succeed |
