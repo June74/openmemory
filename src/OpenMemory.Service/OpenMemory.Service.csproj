@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenMemory.Contracts\OpenMemory.Contracts.csproj" />
+    <ProjectReference Include="..\OpenMemory.Storage\OpenMemory.Storage.csproj" />
+    <ProjectReference Include="..\OpenMemory.Indexing\OpenMemory.Indexing.csproj" />
+    <ProjectReference Include="..\OpenMemory.Adapters.Abstractions\OpenMemory.Adapters.Abstractions.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+</Project>
