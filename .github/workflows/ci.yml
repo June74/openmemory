@@ -82,3 +82,79 @@ jobs:
 
       - name: Check repository-internal links
         run: bash tools/check-links.sh
+
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          curl -sSfL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz"
+          tar -xzf gitleaks.tar.gz gitleaks
+          chmod +x gitleaks
+
+      - name: Scan repository history
+        run: ./gitleaks git --no-banner --redact --exit-code 1 .
+
+  dependency-review:
+    name: dependency-review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Review dependencies
+        uses: actions/dependency-review-action@v4
+
+  artifact:
+    name: artifact
+    runs-on: windows-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Publish executables
+        shell: pwsh
+        run: |
+          foreach ($p in "Service", "Cli", "McpBridge") {
+            dotnet publish "src/OpenMemory.$p/OpenMemory.$p.csproj" `
+              --configuration Release `
+              --output "artifacts/publish/OpenMemory.$p"
+          }
+
+      - name: Package and checksum
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts/out | Out-Null
+          Compress-Archive -Path artifacts/publish/* -DestinationPath artifacts/out/openmemory-dev.zip
+          $hash = Get-FileHash -Algorithm SHA256 -Path artifacts/out/openmemory-dev.zip
+          "$($hash.Hash.ToLower())  openmemory-dev.zip" |
+            Out-File -FilePath artifacts/out/openmemory-dev.zip.sha256 -Encoding ascii
+          Get-Content artifacts/out/openmemory-dev.zip.sha256
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: artifacts/out/openmemory-sbom.cyclonedx.json
+          upload-artifact: false
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openmemory-dev
+          path: artifacts/out/
+          if-no-files-found: error
