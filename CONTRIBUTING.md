@@ -31,6 +31,17 @@ Checks are not yet enforced by GitHub. The intended ruleset is recorded in [.git
 | Repo-internal link check | Every repository-internal Markdown link resolves to an existing file or anchor. | Not enforced — Wave C |
 | Independent specification and quality review | The diff satisfies the relevant spec and contains no defect an independent reviewer would flag. | Not enforced — Wave C (performed manually via `codex exec` in the interim) |
 
+### Placeholder test projects
+
+A test project with no behavior to cover yet must contain exactly one skipped test, not zero tests. The skip reason must name what is missing and when it is expected. `dotnet test` exits 0 for a project with no tests at all, printing only "No test is available", so an empty project is indistinguishable from a broken test discovery; a skipped test still appears in every run's skip count. No test project currently needs this — all three have real tests — so this applies to test projects added from Stage 2 onward.
+
+```csharp
+[Fact(Skip = "Stage 2: no Storage behavior exists yet")]
+public void Placeholder()
+{
+}
+```
+
 ### License headers
 
 Source files added from Wave B onward carry an Apache-2.0 header. Wave A adds no source files. `LICENSE` and `NOTICE` remain authoritative.

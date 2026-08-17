@@ -51,6 +51,23 @@ public class ProjectReferenceTests
             mcpBridgeReferences);
     }
 
+    [Fact]
+    public void ContractsDeclaresNoReferencesSoRestrictedProjectsGainNoTransitivePath()
+    {
+        // Project references are transitive, and Contracts sits beneath every project in
+        // the solution. If Contracts ever gained a reference (e.g. to OpenMemory.Storage),
+        // that edge would silently hand Storage to every project that references Contracts
+        // -- including Cli and McpBridge, defeating the restriction asserted above. This
+        // lives here, next to that assertion, rather than in Contracts.Tests, because its
+        // whole purpose is to protect that restriction.
+        var repositoryRoot = FindRepositoryRoot();
+
+        var contractsReferences = ReadProjectReferences(
+            Path.Combine(repositoryRoot, "src", "OpenMemory.Contracts", "OpenMemory.Contracts.csproj"));
+
+        Assert.Empty(contractsReferences);
+    }
+
     private static List<string> ReadProjectReferences(string csprojPath)
     {
         var text = File.ReadAllText(csprojPath);
