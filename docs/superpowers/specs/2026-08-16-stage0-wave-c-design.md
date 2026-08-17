@@ -46,8 +46,12 @@ Verified on 2026-08-16 against `main` at `23d4b20`, with Wave B merged.
 | Ref | Decision | Rationale |
 |---|---|---|
 | C-1 | CI produces a checksummed development artifact: publish `Service`, `Cli`, and `McpBridge`, zip, emit SHA-256, upload with the SBOM. | Stage 8's release depends on this path. Exercising it now, while the payload is three empty `Main` methods, is far cheaper than debugging it when the payload is a real signed installer. Nothing can leak, because nothing is implemented. |
-| C-2 | Add a CI secret-scanning job **in addition to** the already-enabled native scanning, and enable non-provider patterns. | GitHub's native secret scanning is not a status check — branch protection cannot require it. Stage 0 asks for secret scanning *in CI*, and `D-091` needs a real check to gate on. Non-provider patterns matter because this project's threat model covers private keys and connection strings in captured transcripts, not only vendor-format tokens. |
-| C-3 | Enable validity checks. | A secret leaked into a public repository is already exposed, so testing whether it is still live adds negligible risk and real remediation value: it distinguishes "rotate now" from "already dead". |
+| C-2 | Add a CI secret-scanning job **in addition to** the already-enabled native scanning. | GitHub's native secret scanning is not a status check — branch protection cannot require it. Stage 0 asks for secret scanning *in CI*, and `D-091` needs a real check to gate on. **This decision proved load-bearing rather than redundant** — see the availability note below. |
+| C-3 | ~~Enable validity checks.~~ **Superseded — not available on this repository.** | See the availability note below. |
+
+**Availability note, added after implementation.** C-2 originally also called for enabling non-provider patterns, and C-3 for enabling validity checks. Both proved impossible: the REST API accepts a `PATCH` setting them and returns HTTP 200 while silently changing nothing, and the corresponding toggles do not render in the repository's settings UI. The cause is that `advanced_security` is absent from the repository's `security_and_analysis` response entirely — non-provider patterns and validity checks are GitHub **Secret Protection** features, and what is free on a public repository is basic secret scanning plus push protection, both of which are already enabled. The enhanced detection tier is not provisioned here.
+
+The detection gap this leaves is covered by C-2's CI job rather than by a native setting: gitleaks' default configuration carries rules for private keys and generic API keys, which is the class non-provider patterns would have caught. Had the design relied on the native setting alone, this would be an unmitigated hole. The original decisions are recorded above as superseded rather than deleted, so the reasoning and its correction both remain visible.
 | C-4 | .NET jobs run on `windows-latest`; jobs that do not touch the build run on `ubuntu-latest`. | `D-003` fixes Windows 11 x64 as the only supported platform and the Stage 0 gate requires a "clean Windows build". The repository is public, so Actions minutes are free and runner cost is not a factor. |
 | C-5 | The test job asserts a minimum discovered-test **count**, not merely a zero exit code. | `dotnet test` exits 0 both when a project has no tests and when test discovery is broken. Exit code alone cannot distinguish them. This was observed directly during Wave B and is the failure mode that would let a Stage 2 misconfiguration report green while nothing ran. |
 | C-6 | Formatting is enforced for C# only; no TypeScript formatter is added. | `dotnet format` needs no new dependency. Adding Prettier would introduce one for a single 7-line stub file. TypeScript formatting belongs to Stage 6, when the plugin is real. |
@@ -86,13 +90,14 @@ A software bill of materials — the inventory of every dependency the build pul
 
 ### 4.4 Repository settings
 
-Three changes outside the repository tree, each requiring explicit approval before being applied:
+Changes outside the repository tree, each requiring explicit approval before being applied:
 
-1. Enable **non-provider patterns** for secret scanning (C-2).
-2. Enable **validity checks** (C-3).
+1. ~~Enable **non-provider patterns** for secret scanning (C-2).~~ **Not available** — see the availability note in §3.
+2. ~~Enable **validity checks** (C-3).~~ **Not available** — see the availability note in §3.
 3. Enable **branch protection** on `main` with the ruleset already recorded in `.github/branch-protection.md`.
+4. Enable the **dependency graph**, without which `actions/dependency-review-action` fails outright with "Dependency review is not supported on this repository". This was not anticipated when the spec was written and was discovered only when the job ran against a real pull request. Completed by the repository owner.
 
-These are API calls, not file edits. They are listed here so the wave's full footprint is visible in one place rather than discovered during implementation.
+These are settings changes, not file edits. They are listed here so the wave's full footprint is visible in one place rather than discovered during implementation — which items 1, 2, and 4 demonstrate was the right instinct and an incomplete list.
 
 ### 4.5 `.github/branch-protection.md`
 
