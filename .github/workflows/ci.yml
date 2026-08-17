@@ -1,0 +1,186 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: build-and-test
+    runs-on: windows-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Verify formatting
+        run: dotnet format OpenMemory.sln --verify-no-changes
+
+      - name: Restore
+        run: dotnet restore OpenMemory.sln
+
+      - name: Build
+        run: dotnet build OpenMemory.sln --no-restore --nologo
+
+      - name: Run tests
+        run: dotnet test OpenMemory.sln --no-build --nologo
+
+      - name: Assert minimum discovered test count
+        shell: pwsh
+        run: |
+          $expected = 4
+          $listed = dotnet test OpenMemory.sln --no-build --nologo --list-tests
+          $count = ($listed | Where-Object { $_ -match '^\s+\S+\.\S+\.\S+$' }).Count
+          Write-Host "Discovered $count tests (floor $expected)"
+          if ($count -lt $expected) {
+            throw "Discovered $count tests, expected at least $expected. Either tests were removed, or test discovery is broken. dotnet test exits 0 in both cases, which is why this assertion exists."
+          }
+
+  plugin:
+    name: plugin
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/OpenMemory.ObsidianPlugin
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check
+        run: pnpm run typecheck
+
+  docs:
+    name: docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Check repository-internal links
+        run: bash tools/check-links.sh
+
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          curl -sSfL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz"
+          tar -xzf gitleaks.tar.gz gitleaks
+          chmod +x gitleaks
+
+      - name: Scan repository history
+        run: ./gitleaks git --no-banner --redact --exit-code 1 .
+
+  dependency-review:
+    name: dependency-review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Review dependencies
+        uses: actions/dependency-review-action@v5
+
+  artifact:
+    name: artifact
+    runs-on: windows-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Publish executables
+        shell: pwsh
+        run: |
+          foreach ($p in "Service", "Cli", "McpBridge") {
+            dotnet publish "src/OpenMemory.$p/OpenMemory.$p.csproj" `
+              --configuration Release `
+              --output "artifacts/publish/OpenMemory.$p"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Package and checksum
+        shell: pwsh
+        run: |
+          $expectedDirs = @(
+            "artifacts/publish/OpenMemory.Service",
+            "artifacts/publish/OpenMemory.Cli",
+            "artifacts/publish/OpenMemory.McpBridge"
+          )
+          $problems = @()
+          foreach ($dir in $expectedDirs) {
+            if (-not (Test-Path $dir)) {
+              $problems += "missing: $dir"
+            } elseif (-not (Get-ChildItem -Path $dir -Recurse -File -ErrorAction SilentlyContinue)) {
+              $problems += "empty: $dir"
+            }
+          }
+          if ($problems.Count -gt 0) {
+            throw "Publish output incomplete, refusing to package:`n$($problems -join "`n")"
+          }
+
+          New-Item -ItemType Directory -Force -Path artifacts/out | Out-Null
+          Compress-Archive -Path artifacts/publish/* -DestinationPath artifacts/out/openmemory-dev.zip
+          $hash = Get-FileHash -Algorithm SHA256 -Path artifacts/out/openmemory-dev.zip
+          $line = "$($hash.Hash.ToLower())  openmemory-dev.zip"
+          # sha256sum expects LF-only line endings; Out-File/Set-Content emit
+          # CRLF on Windows, which corrupts the filename field (trailing `r`)
+          # and breaks `sha256sum -c` on Linux/macOS/Git Bash consumers.
+          [System.IO.File]::WriteAllText(
+            "artifacts/out/openmemory-dev.zip.sha256",
+            "$line`n",
+            [System.Text.Encoding]::ASCII)
+          Get-Content artifacts/out/openmemory-dev.zip.sha256
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: artifacts/out/openmemory-sbom.cyclonedx.json
+          upload-artifact: false
+          syft-version: "v1.51.0"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: openmemory-dev
+          path: artifacts/out/
+          if-no-files-found: error
