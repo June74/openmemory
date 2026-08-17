@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\OpenMemory.Adapters.Abstractions\OpenMemory.Adapters.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

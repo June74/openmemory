@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenMemory.Contracts\OpenMemory.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
