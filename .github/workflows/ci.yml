@@ -142,8 +142,14 @@ jobs:
           New-Item -ItemType Directory -Force -Path artifacts/out | Out-Null
           Compress-Archive -Path artifacts/publish/* -DestinationPath artifacts/out/openmemory-dev.zip
           $hash = Get-FileHash -Algorithm SHA256 -Path artifacts/out/openmemory-dev.zip
-          "$($hash.Hash.ToLower())  openmemory-dev.zip" |
-            Out-File -FilePath artifacts/out/openmemory-dev.zip.sha256 -Encoding ascii
+          $line = "$($hash.Hash.ToLower())  openmemory-dev.zip"
+          # sha256sum expects LF-only line endings; Out-File/Set-Content emit
+          # CRLF on Windows, which corrupts the filename field (trailing `r`)
+          # and breaks `sha256sum -c` on Linux/macOS/Git Bash consumers.
+          [System.IO.File]::WriteAllText(
+            "artifacts/out/openmemory-dev.zip.sha256",
+            "$line`n",
+            [System.Text.Encoding]::ASCII)
           Get-Content artifacts/out/openmemory-dev.zip.sha256
 
       - name: Generate SBOM
