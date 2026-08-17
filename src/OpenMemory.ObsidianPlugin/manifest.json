@@ -1,0 +1,9 @@
+{
+  "id": "openmemory",
+  "name": "OpenMemory",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Local, private, temporal memory for terminal AI clients. Not yet implemented.",
+  "author": "OpenMemory contributors",
+  "isDesktopOnly": true
+}

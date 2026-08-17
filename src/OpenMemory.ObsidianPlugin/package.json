@@ -1,0 +1,19 @@
+{
+  "name": "openmemory-obsidian-plugin",
+  "version": "0.1.0",
+  "description": "Obsidian interface for OpenMemory. Not yet implemented.",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=11.0.0"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
