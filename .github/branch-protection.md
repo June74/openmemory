@@ -1,17 +1,22 @@
 # Branch protection
 
 > **Status:** The required checks below are now real and verified green.
-> Enablement to GitHub is pending Task 5.
+> Enablement to GitHub is pending explicit approval from the repository owner.
 
-## Why it is deferred
+## Enablement is pending repository owner approval
 
-`CONTRIBUTING.md` states that direct implementation commits to `main` are not
-allowed. That rule is currently enforced by process, not by GitHub. A
-protection rule cannot require status checks that do not exist, so enabling
-protection before Wave C would either require nothing or block every merge.
+Originally, protection was deferred because a protection rule cannot require
+status checks that do not exist, and the CI workflow did not exist yet. That
+prerequisite has been satisfied: the required checks are now defined, verified
+green, and documented in the section below.
 
-Until Wave C, independent review is performed locally with `codex exec` after
-implementation and before integration.
+The remaining gate is explicit approval from the repository owner to enable
+GitHub branch protection. Until that approval is given, `main` remains
+protected by process: `CONTRIBUTING.md` states that direct implementation
+commits to `main` are not allowed. That rule is currently enforced by policy
+and code review, not by GitHub. Independent review is performed locally with
+`codex exec` after implementation and before integration, and this remains
+the operative control.
 
 ## Ruleset to enable in Wave C
 
