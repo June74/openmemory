@@ -34,7 +34,7 @@ Every task's requirements implicitly include this section.
 
 **Interfaces:**
 - Consumes: `OpenMemory.sln`, `global.json`, `tools/check-links.sh`, and `src/OpenMemory.ObsidianPlugin/package.json` — all from `main`.
-- Produces: job names `build-and-test`, `plugin`, and `docs`, which Task 4 records as required checks and Task 5 enforces. **These exact strings matter** — branch protection matches required checks by name, and a renamed job silently stops being enforced.
+- Produces: job names `build-and-test`, `plugin`, and `docs`, which Task 4 records as required checks and Task 5 enforces. **These exact strings matter** — branch protection matches required checks by name. Renaming a job without updating the required-check list does not silently un-enforce it; GitHub fails closed, so the old context never reports and every pull request waits on it indefinitely, blocking merges. A *skipped* job still reports a conclusion and counts as passing, whereas a *renamed* job's old context reports nothing at all, so the two behave oppositely.
 
 - [ ] **Step 1: Verify no workflow exists**
 
@@ -366,7 +366,7 @@ Fix the cause and push again. Expected failures, and the correct response to eac
 | `dotnet format --verify-no-changes` fails | Wave B's files were never format-checked. Run `dotnet format OpenMemory.sln` locally, commit the result as one formatting commit. **Do not** remove or weaken the format step. |
 | gitleaks reports a finding | Investigate it. If a real secret exists, stop and report immediately — do not commit over it. If it is a false positive, add a narrowly-scoped `.gitleaks.toml` allowlist entry with a comment explaining why, never a blanket ignore. |
 | The test-count assertion fails | The regex does not match this runner's output format. Report the actual `--list-tests` output. **Do not lower `$expected` or loosen the regex** — that would restore the vacuous pass the assertion exists to prevent. |
-| `dependency-review` fails | Read what it flagged. A vulnerable or incompatible-licence dependency is a real finding, not a check to disable. |
+| `dependency-review` fails | Read what it flagged. A known-vulnerable dependency is a real finding, not a check to disable. Note the action runs without `allow-licenses`/`deny-licenses`, so it does not enforce licence policy. |
 | An action version does not exist | Bump to the current major tag and record which version you used. |
 
 Push after each fix and re-watch. Repeat until every job is green.
@@ -440,7 +440,7 @@ together to avoid a permanently blocked pull request.
 | `plugin` | The Obsidian plugin installs from the committed lockfile and type-checks |
 | `docs` | Every repository-internal Markdown link resolves |
 | `secret-scan` | gitleaks finds no secret in the full history |
-| `dependency-review` | No vulnerable or incompatible-licence dependency is introduced |
+| `dependency-review` | No known-vulnerable dependency is introduced by the pull request |
 | `artifact` | Publish, checksum, and SBOM generation succeed |
 ```
 
