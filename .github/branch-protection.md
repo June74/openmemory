@@ -1,24 +1,34 @@
 # Branch protection
 
-> **Status:** The required checks below are now real and verified green.
-> Enablement to GitHub is pending explicit approval from the repository owner.
+> **Status:** ENABLED on `main` as of 2026-08-17. The ruleset below is in
+> force, and the required checks named further down are the six that gate
+> every pull request into `main`.
 
-## Enablement is pending repository owner approval
+## How this came to be enabled
 
 Originally, protection was deferred because a protection rule cannot require
 status checks that do not exist, and the CI workflow did not exist yet. That
 prerequisite has been satisfied: the required checks are now defined, verified
 green, and documented in the section below.
 
-The remaining gate is explicit approval from the repository owner to enable
-GitHub branch protection. Until that approval is given, `main` remains
-protected by process: `CONTRIBUTING.md` states that direct implementation
-commits to `main` are not allowed. That rule is currently enforced by policy
-and code review, not by GitHub. Independent review is performed locally with
-`codex exec` after implementation and before integration, and this remains
-the operative control.
+The repository owner approved enablement on 2026-08-17, and the ruleset below
+was applied to `main`. The rule that `CONTRIBUTING.md` publishes — that direct
+implementation commits to `main` are not allowed — is therefore now enforced by
+GitHub rather than by policy alone.
 
-## Ruleset to enable in Wave C
+Independent review with `codex exec` before integration remains the operative
+review control. GitHub enforces that checks pass and that changes arrive by
+pull request; it does not assess whether a change is correct. Required
+approving reviews are set to zero because a sole maintainer cannot approve
+their own pull request, so `codex exec` output recorded in the pull-request
+evidence is what stands in for a human reviewer.
+
+One limitation worth recording rather than discovering later: Wave C's own
+pull request (#4) merged before protection was enabled, so the ruleset was
+never exercised against the change that created it. The first pull request it
+actually gates is the next one.
+
+## The enforced ruleset
 
 Applied to `main`:
 
