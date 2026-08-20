@@ -37,7 +37,7 @@ Verified 2026-08-18 against `main` at `8669442`.
 | D1-2 | The threat model covers **both** the built CI/supply-chain surface and the designed product architecture, in two explicitly separated parts. | Modelling only what is built would omit everything Stage 2's security-sensitive implementation needs, which is the reason Stage 0 asks for a threat model at all. Modelling only the design would ignore the one surface actually running today. |
 | D1-3 | Every claim is marked as evidenced by **code** or by **approved design**, and Part B is labelled *designed, not implemented* throughout. | The `security-threat-model` skill forbids claiming components, flows, or controls without evidence. Design documents evidence intent, not behavior, and conflating the two is the exact defect independent review has already caught twice in this project. |
 | D1-4 | Attacker **non-capabilities** are stated explicitly alongside capabilities. | The skill requires this to prevent inflated severity. `D-015` specifies no listening network port and `D-002` specifies single-user, so a remote network attacker and cross-tenant access are out of scope by design rather than by oversight. |
-| D1-5 | Two carried debts are absorbed: SHA-pinning the GitHub Actions, and Wave B's `ContractsReferencesNothing` transitive-reference guard. | Both are supply-chain and integrity controls that Part A would recommend anyway. Implementing them inside the wave that identifies them is cheaper than filing them for later. |
+| D1-5 | One carried debt is absorbed: SHA-pinning the GitHub Actions. | It is a supply-chain control Part A would recommend anyway, so implementing it inside the wave that identifies it is cheaper than filing it. **Corrected after drafting:** this decision originally claimed a second debt, the `Contracts` transitive-reference guard. That guard already exists — it was implemented in Wave B as `ContractsDeclaresNoReferencesSoRestrictedProjectsGainNoTransitivePath` (commit `9b32ff2`). The spec asserted work that was already complete; see §4.3. |
 | D1-6 | The threat model is written to `docs/security/openmemory-threat-model.md`. | The skill prescribes the basename `<repo-name>-threat-model.md`. The `docs/` placement follows this repository's existing convention rather than dropping a file at the root. |
 | D1-7 | Part B covers a **seventh** area beyond the six boundaries `ARCHITECTURE.md` enumerates: installation and lifecycle. | All six documented boundaries describe the service already installed, trusted, and running. The user's actual journey begins earlier — acquire, install, first run, grant access to a project — and ends later, at uninstall. Those transitions are where trust is established rather than enforced, and nothing in the approved documents models them as a boundary. |
 
@@ -87,11 +87,15 @@ Every `uses:` in `ci.yml` moves from a mutable major tag to a full commit SHA, w
 
 **An interaction that must be preserved:** Dependabot understands SHA pins carrying version comments and continues to open update pull requests against them. Pinning must not break the mechanism that keeps the pins current, or it trades a staleness problem for an opacity problem.
 
-### 4.3 `ContractsReferencesNothing` transitive guard
+### 4.3 The transitive-reference guard — already satisfied, no work required
 
-Wave B's architecture tests assert each project's **direct** references. If `OpenMemory.Contracts` ever gained a reference to a future project that itself reached `Storage`, then `McpBridge` would acquire a transitive path to storage and no test would fail. An assertion that `Contracts` declares zero references forecloses that.
+This section originally specified adding an assertion that `OpenMemory.Contracts` declares zero project references, closing the gap where a future project beneath `Contracts` could hand `McpBridge` a transitive path to `Storage`.
 
-Wave B's own re-review identified this gap and deferred it.
+**That guard already exists.** It was implemented during Wave B as `ContractsDeclaresNoReferencesSoRestrictedProjectsGainNoTransitivePath` in `tests/OpenMemory.Service.Tests/ProjectReferenceTests.cs`, commit `9b32ff2`, and was proved able to fail by temporarily introducing the forbidden reference before reverting.
+
+The section is retained rather than deleted so the error is visible: this specification asserted a deliverable that was already complete, from work the same author had directed two waves earlier. `AGENTS.md` requires marking records superseded rather than rewriting history, and a spec that quietly drops a mistaken claim teaches nothing.
+
+**The wave still verifies the guard exists and still fails correctly** — see §5 — because inheriting a control without checking it is how a control becomes decorative.
 
 ## 5. Verification
 
@@ -107,7 +111,7 @@ A threat model is prose, so verification is about grounding rather than executio
 | Every §12 verification item maps to a threat | `DATA_AND_PRIVACY.md` §12 lists twelve; confirm coverage or state why an item is out of scope |
 | SHA pins are real commit SHAs and CI still passes | Workflow run green after pinning |
 | Dependabot still recognises the pinned actions | Configuration inspected and behavior confirmed |
-| The new architecture test can actually fail | Temporarily add a reference to `Contracts`, observe failure, revert |
+| The inherited transitive guard still exists and still fails | Confirm `ContractsDeclaresNoReferencesSoRestrictedProjectsGainNoTransitivePath` is present, then temporarily add a reference to `Contracts`, observe failure, revert. Inheriting a control without re-proving it is how a control becomes decorative |
 | Links | `bash tools/check-links.sh` |
 | Independent review | `codex exec` over the branch diff |
 
