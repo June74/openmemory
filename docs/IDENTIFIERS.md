@@ -13,11 +13,17 @@ This document is the single place that defines what an identifier means in OpenM
 | `F-NNN` | Deferred decision | In use | `DECISION_REGISTER.md` |
 | `SET-YYYYMMDD-NNN` | Setback record | In use | `docs/operations/setbacks/` |
 | `REQ-<AREA>-NNN` | Product requirement | Defined here, applied later | `PRODUCT_REQUIREMENTS.md` |
+| `THR-NNN` | Threat model entry | In use | `THREAT_MODEL.md` |
+| `SC-<AREA>-NNN` | Frozen security contract rule | In use | `docs/contracts/` |
 | `ADR-NNNN` | Long-form architecture decision record | Reserved, none created | — |
 
 `D-*` remains the single decision register. `ADR-*` is reserved for a decision that needs context, alternatives, and consequences at a length the register table cannot hold, but no ADR document exists yet in this repository. Two competing decision systems are explicitly not wanted: a decision is recorded once, in the register, and only grows an ADR document when the register entry alone cannot carry the necessary detail. Introducing `ADR-*` here reserves the prefix so that a future long-form decision has a stable slot to land in, without creating a second, parallel place where decisions might be recorded instead of the register.
 
 `REQ-<AREA>-NNN` is defined here but not yet applied to the existing requirement text in `PRODUCT_REQUIREMENTS.md`. That document's requirements are not renumbered or edited by this task. Applying the `REQ-*` scheme to existing requirement text is a separate, later task (spec §7).
+
+`SC-<AREA>-NNN` is namespaced by contract area — `CAP`, `CONF`, `CONSENT`, and `PUB` — rather than running as one flat series, because the four security contracts in `docs/contracts/` are owned, versioned, and frozen as four separate documents. A flat series would imply a single contract that changes as one unit, which is exactly what they are not: `SC-PUB` can gain a rule without touching the meaning of any `SC-CAP` rule. `THR-NNN` is flat, because the threat model is one document with one version.
+
+Both schemes exist so that later stages cite a rule or a threat by identifier instead of paraphrasing it. A Stage 3 adapter that claims to satisfy "the confirmation rules" cannot be checked; one that claims to satisfy `SC-CONF-003` and `SC-CONF-005` can. This is the same reasoning that produced `D-*` and `REQ-*`.
 
 `D-*`, `X-*`, and `F-*` numbers are allocated **monotonically**: a new entry takes the next unused number in its series, regardless of which section of the register it is filed under. The register's early numbering happens to fall into per-section blocks — technology decisions in the `D-010` range, migration decisions in the `D-080` range — but that grouping is historical, not a rule. A new technology decision does not renumber the sections that follow it, so a section may hold entries from more than one numeric range. An identifier, once assigned, is never reused or renumbered, because other documents cite it.
 

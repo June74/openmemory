@@ -38,6 +38,8 @@ Related documents:
 | D-019 | Sideload the Obsidian plugin during development/private beta, then submit the hardened plugin to the Obsidian community directory for public v1. | Core terminal operation cannot depend on external plugin-review timing. |
 | D-090 | Version the product with SemVer and each contract surface with an independent integer, as specified in [Compatibility](COMPATIBILITY.md), with one recorded exception: the Obsidian plugin uses SemVer, not an integer, because Obsidian's `manifest.json` requires a SemVer `version` field and a `minAppVersion` field. | A database migration does not force a major product release, while the pipe can reject on a protocol integer. No contract integer increasing is one necessary condition for automatic installation, not the whole test; `D-071`'s approval conditions continue to apply in full, as specified in [Compatibility](COMPATIBILITY.md). |
 | D-091 | Document the branch-protection ruleset in Stage 0 Wave A but enable it in Wave C, once continuous integration produces checks worth requiring. | Until then, `main` is protected by process rather than by GitHub, and independent review is performed locally with `codex exec` before integration. |
+| D-092 | Freeze the four Stage 0 security contracts — registered-client capabilities, trusted-human confirmation, external-processing consent, and publisher authentication — as behavioral contracts versioned in their own documents under `docs/contracts/`, and do not add them to [Compatibility](COMPATIBILITY.md) §1. | §1 lists wire and storage surfaces whose integers §6 declares unfrozen until Stage 2. These four freeze at Stage 0. Listing both in one table would put two opposite freeze states in one list and contradict §6. |
+| D-093 | Give every security contract rule a stable `SC-<AREA>-NNN` identifier, registered in [Identifiers](IDENTIFIERS.md). | Stage 1 proofs, Stage 3 adapters, and Stage 7 adversarial tests must cite the exact rule they satisfy or attack. Without identifiers each cites a paraphrase, and paraphrases drift apart from the rule they came from. |
 
 ## 3. Approved capture and processing decisions
 
@@ -87,6 +89,8 @@ Related documents:
 | D-057 | Support encrypted recovery, portable export, and complete hardware transfer. | Changing computers must preserve identities, evidence, graph history, checksums, and vault relationships. |
 | D-058 | Warn before creating plaintext portable exports or allowing the vault to synchronize. | The user can knowingly choose portability or synchronization without exposing the encrypted store. |
 | D-059 | Keep private storage outside detected cloud-sync roots; vault and private store have stable IDs and reciprocal addresses. | The two folders can move independently and find each other without putting raw private data in OneDrive. |
+| D-094 | Generate secret-detection test corpora at test run time from documented synthetic patterns; never commit a corpus file. | `AGENTS.md` prohibits writing a secret value into any file including examples and templates, and the CI `secret-scan` job would fail on committed secret-shaped content. Generation keeps the corpus deterministic without ever placing it under version control. |
+| D-095 | List every committed test fixture in a SHA-256 manifest that a test verifies. | A fixture quietly edited to make a failing test pass is indistinguishable in review from one edited to fix a real defect. The manifest makes the first case a deliberate, visible act rather than a silent one. |
 
 ## 6. Approved code, UX, and operations decisions
 
@@ -153,6 +157,7 @@ These items are intentionally left for Stage 0 design or Stage 1 feasibility tes
 | F-008 | Exact Obsidian community-submission date and review checklist | Plugin maturity, privacy review, and current community-directory requirements; sideload-then-submit remains fixed. |
 | F-009 | Quantitative retrieval, indexing, and startup performance targets | Stage 1 baselines on representative personal repositories and histories. |
 | F-010 | Repository-grounded threat model and subsystem implementation plans | Create after the repository structure and executable trust boundaries exist. |
+| F-011 | Exact user-presence mechanism satisfying `SC-CONF-007`, and its resistance to same-user process spoofing | Decide during Stage 1's Windows packaging and client-connection proof, against observed Windows behavior rather than assumed behavior. The requirement the mechanism must satisfy is frozen; only the mechanism is deferred. |
 
 ## 10. Source-choice traceability
 

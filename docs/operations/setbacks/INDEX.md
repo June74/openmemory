@@ -9,3 +9,4 @@ This index records unexpected project-work failures without storing secrets or p
 | SET-20260816-003 | 2026-08-16 | Closed | Sandbox blocked Git index write | [Details](SET-20260816-003-git-index-permission.md) |
 | SET-20260816-004 | 2026-08-16 | Closed | Rendered README probe mixed HTML and JSON modes | [Details](SET-20260816-004-readme-render-probe.md) |
 | SET-20260816-005 | 2026-08-16 | Closed | Active workspace prevented folder rename | [Details](SET-20260816-005-workspace-rename-lock.md) |
+| SET-20260821-006 | 2026-08-21 | Closed | .NET toolchain unavailable in the remote session environment | [Details](SET-20260821-006-dotnet-toolchain-unavailable.md) |
