@@ -271,11 +271,15 @@ Requirements for the content:
 
 ```bash
 cd /home/user/openmemory && bash tools/check-links.sh
-grep -o 'SC-[A-Z]*-[0-9][0-9][0-9]' docs/contracts/*.md | sort -u | wc -l
+grep -oh 'SC-[A-Z]*-[0-9][0-9][0-9]' docs/contracts/*.md | sort -u | wc -l
 grep -rniE '(sk-[A-Za-z0-9]{8,}|ghp_[A-Za-z0-9]{8,}|-----BEGIN)' docs/contracts/ && echo FAIL || echo "PASS: no secret-shaped content"
 ```
 
 Expected: links exit `0`; the identifier count is exactly `34` (8 + 9 + 9 + 8); no secret-shaped content.
+
+> **Plan correction, 2026-08-21.** Two flaws in these commands, both found by Worker A running them as written rather than around them.
+> 1. The count command originally omitted `grep -h`. Across multiple files `grep -o` prefixes each match with its filename, so `sort -u` counts unique *file:identifier* pairs and returns `46` — the 34 rules plus 12 legitimate cross-document references, one of which this plan itself mandates (`SC-PUB-005` cites `SC-CONF-001`). The expectation was right; the command measured something else.
+> 2. `tools/check-links.sh` iterates `git ls-files`, so it cannot see untracked files. Its exit `0` says nothing about documents that have not been staged yet. Stage the new files (`git add`) before treating a link check as evidence about them — a green check over files it never opened is the most expensive kind of false confidence.
 
 - [ ] **Step 5: Commit**
 
