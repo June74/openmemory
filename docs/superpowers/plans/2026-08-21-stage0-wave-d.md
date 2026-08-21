@@ -319,11 +319,13 @@ Structure, per spec §4.1:
 ```bash
 cd /home/user/openmemory
 grep -o 'THR-0[0-9][0-9]' docs/THREAT_MODEL.md | sort -u | wc -l
-sed -n '/## 12. Required security verification/,/^$/p' docs/DATA_AND_PRIVACY.md | grep -c '^- '
+sed -n '/## 12. Required security verification/,/^The repository-grounded/p' docs/DATA_AND_PRIVACY.md | grep -c '^- '
 bash tools/check-links.sh
 ```
 
-Expected: `29` distinct threats; every one of the 12 verification bullets present in the coverage table; links exit `0`.
+Expected: `29` distinct threats; `12` verification bullets, every one present in the coverage table; links exit `0`.
+
+> **Plan correction, 2026-08-21.** The bullet-count command originally ended its `sed` range at `/^$/`, which is the blank line immediately *after* the heading — so it counted `0` bullets regardless of the document's content, and would have reported success-shaped output for a threat model covering nothing. Worker B ran it as written, got `0`, and reported it rather than working around it. The range now ends at the section's closing sentence. A verification command that cannot fail correctly is worse than no command, because it is mistaken for evidence.
 
 - [ ] **Step 4: Commit**
 
