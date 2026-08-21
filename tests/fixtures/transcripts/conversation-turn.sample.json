@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "turnId": "0192f2a1-4c3d-7e20-8c31-7d8e9f0a1b23",
+  "eventId": "0192f2a1-4c3d-7e10-8b21-5f6a7c8d9e01",
+  "projectId": "0192f2a1-4c3d-7e11-93c4-2a1b0c9d8e72",
+  "capturedAt": "2026-01-01T00:00:00Z",
+  "complete": true,
+  "messages": [
+    {
+      "index": 0,
+      "role": "user",
+      "content": "How long do we keep draft notes before they are archived?"
+    },
+    {
+      "index": 1,
+      "role": "assistant",
+      "content": "Let me look up the retention rule for drafts.",
+      "toolCalls": [
+        {
+          "callId": "call-0001",
+          "name": "search_notes",
+          "arguments": {
+            "query": "draft retention",
+            "limit": 3
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "role": "tool",
+      "callId": "call-0001",
+      "name": "search_notes",
+      "status": "ok",
+      "content": "1 result: \"Drafts are archived thirty days after their last edit, and archived drafts stay readable.\""
+    },
+    {
+      "index": 3,
+      "role": "assistant",
+      "content": "Draft notes are archived thirty days after the last edit. Archiving keeps them readable; nothing is deleted."
+    }
+  ]
+}

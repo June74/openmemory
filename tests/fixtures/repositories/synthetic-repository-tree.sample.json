@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "repositoryId": "0192f2a1-4c3d-7e12-a5d6-6b4c3d2e1f83",
+  "name": "example-notes-service",
+  "defaultBranch": "main",
+  "commit": "0000000000000000000000000000000000000001",
+  "languages": [
+    {
+      "name": "csharp",
+      "fileCount": 2,
+      "lineCount": 190
+    },
+    {
+      "name": "markdown",
+      "fileCount": 1,
+      "lineCount": 24
+    }
+  ],
+  "files": [
+    {
+      "path": "docs/retention.md",
+      "language": "markdown",
+      "lineCount": 24,
+      "symbols": []
+    },
+    {
+      "path": "src/Notes/NoteStore.cs",
+      "language": "csharp",
+      "lineCount": 120,
+      "symbols": [
+        {
+          "name": "NoteStore",
+          "kind": "class",
+          "line": 9
+        },
+        {
+          "name": "NoteStore.Add",
+          "kind": "method",
+          "line": 21
+        },
+        {
+          "name": "NoteStore.Archive",
+          "kind": "method",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "path": "src/Notes/RetentionPolicy.cs",
+      "language": "csharp",
+      "lineCount": 70,
+      "symbols": [
+        {
+          "name": "RetentionPolicy",
+          "kind": "class",
+          "line": 7
+        },
+        {
+          "name": "RetentionPolicy.DraftArchiveAfterDays",
+          "kind": "property",
+          "line": 12
+        }
+      ]
+    }
+  ]
+}

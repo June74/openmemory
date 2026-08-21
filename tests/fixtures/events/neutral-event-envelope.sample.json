@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "eventId": "0192f2a1-4c3d-7e10-8b21-5f6a7c8d9e01",
+  "eventType": "conversation.turn.completed",
+  "capturePath": "hook",
+  "capturedAt": "2026-01-01T00:00:00Z",
+  "projectId": "0192f2a1-4c3d-7e11-93c4-2a1b0c9d8e72",
+  "repositoryId": "0192f2a1-4c3d-7e12-a5d6-6b4c3d2e1f83",
+  "installationId": "0192f2a1-4c3d-7e13-b7e8-8c5d4e3f2a94",
+  "contentHash": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f809",
+  "processingStatus": "pending",
+  "payload": {
+    "turnId": "0192f2a1-4c3d-7e20-8c31-7d8e9f0a1b23",
+    "summary": "The user asked how long draft notes are kept, and the assistant answered from the retention rules.",
+    "messageCount": 4,
+    "toolCallCount": 1,
+    "sensitivity": "project"
+  },
+  "provenance": {
+    "sourceRecordId": "example-adapter:turn-000001",
+    "sourceAdapter": "example-adapter",
+    "encrypted": true
+  }
+}
