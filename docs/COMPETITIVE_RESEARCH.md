@@ -1,6 +1,6 @@
 # Competitive research
 
-Status: planning baseline, 2026-08-16. OpenMemory implementation has not begun.
+Status: planning baseline, first written 2026-08-16, refreshed 2026-08-22. OpenMemory implementation has not begun.
 
 ## How to read this document
 
@@ -87,17 +87,23 @@ The reference helps establish feasibility, not equivalence. OpenMemory selected 
 
 The public [LLM Wiki prompt and notes](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), and later community workflows built around them, popularized a simple pattern: preserve raw sources, compile them into a navigable Markdown knowledge base, and let a coding agent search and maintain the result. Obsidian is a convenient editor and navigator for that portable Markdown.
 
+Community write-ups describe the pattern as three layers: immutable raw sources, an LLM-maintained wiki whose pages cross-reference each other and flag contradictions, and a schema or conventions file that fixes page naming, tag vocabulary, and the minimum structure of an entry. The framing is that knowledge is compiled once and then kept current, rather than re-retrieved and re-synthesized on every query. It is a discipline and a prompt, not a service: there is no server, no index contract, no encryption boundary, and no capture mechanism beyond whatever the operator pastes in.
+
 Ideas incorporated:
 
 - human-readable project indexes and linked notes;
 - separation between raw evidence, curated knowledge, and generated reports;
 - an AI-maintained table of contents rather than injecting every past chat;
+- a declared schema for naming, tagging, and minimum record structure, so curated knowledge stays consistent as it grows;
+- contradictions surfaced when knowledge is written, not only when it is queried;
 - Obsidian as the primary human interface while keeping the memory usable without Obsidian.
 
 Not adopted for v1:
 
 - treating a plaintext vault as the complete private database;
 - loading an entire vault or complete chat history into every model turn;
+- rewriting a curated page in place, which discards the earlier claim and its evidence;
+- depending on operator discipline instead of automatic, resumable capture;
 - granting AI-generated notes automatic authority.
 
 OpenMemory keeps sensitive raw history encrypted and projects selected, editable knowledge into Markdown.
@@ -106,10 +112,14 @@ OpenMemory keeps sensitive raw history encrypted and projects selected, editable
 
 [akitaonrails/ai-memory](https://github.com/akitaonrails/ai-memory) describes sanitized lifecycle capture, a Markdown wiki usable in Obsidian, bounded handoffs, local indexing, shared use across several agent harnesses, and backup-friendly files.
 
+Its public documentation describes Markdown in a Git repository as the source of truth with SQLite and FTS5 as a derived, rebuildable index, and a sleep-style consolidation cycle in which recent records keep raw detail while older records are summarized, with access counts and exponential decay influencing what is retained. The author also documents it as a response to problems observed in the earlier `agentmemory` project, including reindexing, data loss, and broken hooks.
+
 Ideas incorporated:
 
 - hooks should be lightweight and capture lifecycle events without blocking the client;
 - one serialized database writer reduces corruption and concurrency risk;
+- a derived index should be rebuildable from durable records, so index damage is recoverable rather than fatal;
+- consolidation belongs on a scheduled cycle rather than in the interactive response path;
 - retrieval packets must be bounded;
 - project and worktree identity need explicit handling;
 - raw evidence and curated Markdown serve different purposes.
@@ -117,8 +127,11 @@ Ideas incorporated:
 Not adopted for v1:
 
 - Markdown as the sole source of truth for complete private history;
+- decay or access-count pressure that removes records rather than deprioritizing them;
 - its launcher, Rust implementation, or exact capture limits;
 - assuming lifecycle observations are complete transcripts.
+
+OpenMemory inverts the authority direction: the encrypted database is authoritative and Markdown is a projection of selected knowledge, because a plaintext Git wiki cannot hold complete private history under this project's privacy model.
 
 ### memem
 
@@ -189,11 +202,15 @@ Not adopted for v1:
 
 ### Graphify
 
-The name Graphify is used by several graph-building projects. The relevant pattern here is represented by [rhanka/graphify](https://github.com/rhanka/graphify): turn project material into a queryable knowledge graph with canonical entities, typed relationships, reconciliation, and scope-aware operations. This is distinct from Graphiti: Graphiti is primarily a temporal knowledge-graph framework for agent memory, while Graphify is primarily a project, code, and document graph-building pattern.
+The name Graphify is used by several graph-building projects. The relevant pattern here is represented by [rhanka/graphify](https://github.com/rhanka/graphify), which itself builds on an earlier code-structure graph tool of the same name: turn project material into a queryable knowledge graph with canonical entities, typed relationships, reconciliation, and scope-aware operations. This is distinct from Graphiti: Graphiti is primarily a temporal knowledge-graph framework for agent memory, while Graphify is primarily a project, code, and document graph-building pattern, distributed as a skill for coding assistants rather than as a running service.
+
+Two published details matter for OpenMemory. Graphify describes tagging each relation by how it was obtained — found in the source, inferred with a confidence score, or ambiguous and flagged for review — so a reader can separate extraction from guesswork. It also describes extracting code structure locally through AST parsing without model calls, and clustering by graph topology rather than by embeddings, with export targets including an agent-crawlable wiki and an Obsidian vault.
 
 Ideas incorporated:
 
 - canonical entities and typed, explainable relations;
+- every relation records how it was obtained, so inferred and ambiguous claims are never presented as observed facts;
+- structural extraction that does not require a model call, which keeps indexing available when model processing is unavailable;
 - entity reconciliation rather than creating a new node for every mention;
 - scope-aware project graphs connected to source evidence;
 - structural code and artifact relationships that complement conversational memory.
@@ -243,6 +260,32 @@ Not adopted for v1:
 - adopting a general agent runtime, shell, or orchestration layer;
 - copying its plugin contract instead of defining OpenMemory's versioned MCP and service contracts.
 
+### OpenHuman
+
+[OpenHuman](https://github.com/tinyhumansai/openhuman) was published in May 2026 and was missed by the first pass of this document. It is the most widely adopted project in this survey and the closest public system to OpenMemory's local-first ambition, while differing from it on almost every product boundary. Its public material describes a GPL-3.0 desktop application with a Rust core and a TypeScript front end, running on macOS, Linux, and Windows, and it remains labelled early beta under active development.
+
+The memory design is described as a Memory Tree: a hierarchical graph of scored Markdown compressed into a local SQLite database and mirrored as an editable Obsidian vault, explicitly positioned against opaque vector stores. Public write-ups describe the tree in roughly three planes — thematic nodes, entities such as people and repositories, and the underlying raw documents. Around that sit an auto-fetch cycle that pulls from connected accounts on a fixed interval, a large catalogue of OAuth connectors and MCP servers, and a tool-output compression step intended to cut token cost. Stated safety properties include on-device encryption, an approval gate, secrets in the OS keyring, opt-in sandboxing, a privacy mode enforced in the Rust core, and end-to-end encryption between agents.
+
+Ideas incorporated:
+
+- a hierarchical, scored memory tree is a credible alternative to flat ranked chunks, and node scoring is worth evaluating against OpenMemory's ranking rules;
+- human-readable curated memory and a machine index can be maintained together rather than chosen between;
+- a compression step between tool output and model context is a distinct, measurable concern from retrieval itself;
+- a privacy mode enforced in the core, rather than by convention in each adapter, is the correct enforcement location;
+- an approval gate and OS-keyring secret storage belong in the product from the start, not after launch;
+- background ingestion on a schedule keeps the interactive path free of capture work.
+
+Not adopted for v1:
+
+- agent orchestration, sub-agent fleets, durable workflow execution, and deep research, which OpenMemory excludes by decision `D-005`;
+- broad personal-life ingestion from mail, calendar, messaging, and financial accounts; OpenMemory v1 captures coding-assistant conversations and tool evidence only;
+- a large third-party connector and skill catalogue, each entry of which is an unreviewed trust and egress surface;
+- a mirrored plaintext Obsidian vault as part of the authoritative private store; OpenMemory's authority is the encrypted SQLCipher database, and the vault holds only selected projected knowledge;
+- agent-to-agent networking of any kind, which places private memory on a wire;
+- GPL-3.0 material of any kind: GPL-3.0 code cannot be redistributed under this repository's Apache-2.0 terms, so no OpenHuman source, schema, or prompt text may be copied into OpenMemory, and its patterns may only be reimplemented independently from public descriptions.
+
+The interesting overlap is that OpenHuman documents optional use of a separate `agentmemory` backend so several coding tools can share one persistent store. That is the same cross-client goal as OpenMemory, reached by delegating to a second component rather than by defining one provider-neutral contract. OpenMemory keeps the contract in the service itself, because provider neutrality and encrypted provenance are properties this project has to be able to prove, not configure.
+
 ## Other OpenMemory projects and name collisions
 
 ### CaviraOSS/OpenMemory
@@ -257,17 +300,52 @@ OpenMemory adopts the value of explainable retrieval, temporal relationships, re
 
 OpenMemory adopts the need to evaluate atomic extraction, contradiction history, graph links, and rank fusion. It does not adopt automatic forgetting or deletion, a localhost REST authority, grammar-based extraction as the sole truth mechanism, or its implementation. OpenMemory's user authority, encrypted evidence, approval workflow, and bitemporal history remain mandatory.
 
-### Mem0 OpenMemory browser extension
+### Mem0 OpenMemory
 
-Mem0's archived [OpenMemory browser extension](https://github.com/mem0ai/mem0-chrome-extension) explored cross-site memory continuity, automatic capture and retrieval, and a user-facing memory dashboard across browser AI products.
+Mem0 uses the OpenMemory name for two things. The name collision that matters most is [OpenMemory MCP](https://mem0.ai/blog/introducing-openmemory-mcp), described as a local-first memory server that exposes one persistent memory layer over MCP so that Claude, Cursor, Windsurf, and other MCP clients can write context in one tool and read it in another, with the data held on the user's machine. That is the same headline promise as this project, from a vendor with an established hosted product, and the overlap is in the product claim rather than only in the name. Mem0's separately documented self-hosted stack describes containers for an API service, PostgreSQL with pgvector, and Neo4j for entity relationships.
 
-OpenMemory adopts the product lesson that continuity should feel automatic and inspectable. It does not adopt a browser extension, Google sign-in, a hosted API dependency, or sending private conversations to a remote memory provider in v1.
+Mem0's archived [OpenMemory browser extension](https://github.com/mem0ai/mem0-chrome-extension) explored the same continuity idea in the browser: cross-site memory, automatic capture and retrieval, and a user-facing memory dashboard across browser AI products.
+
+OpenMemory adopts the product lessons that cross-client continuity should feel automatic and inspectable, and that a local MCP server is a viable delivery shape for it. It does not adopt a browser extension, Google sign-in, a hosted API dependency, a container stack with separate vector and graph services, a listening HTTP surface, or sending private conversations to a remote memory provider in v1. The substantive differences remain bitemporal history, encrypted evidence, explicit authority and conflict review, and secret redaction as product requirements rather than deployment options.
 
 ### Naming consequence
 
-The name **OpenMemory** is already used by unrelated or overlapping public projects, including [CaviraOSS/OpenMemory](https://github.com/CaviraOSS/OpenMemory), [AndroidPoet/openmemory](https://github.com/AndroidPoet/openmemory), and Mem0's archived [OpenMemory browser extension](https://github.com/mem0ai/mem0-chrome-extension). Search results, package names, executable names, domains, and trademark availability therefore cannot be assumed.
+The name **OpenMemory** is already used by unrelated or overlapping public projects, including [CaviraOSS/OpenMemory](https://github.com/CaviraOSS/OpenMemory), [AndroidPoet/openmemory](https://github.com/AndroidPoet/openmemory), Mem0's [OpenMemory MCP](https://mem0.ai/blog/introducing-openmemory-mcp), and Mem0's archived [OpenMemory browser extension](https://github.com/mem0ai/mem0-chrome-extension). Search results, package names, executable names, domains, and trademark availability therefore cannot be assumed. Mem0's OpenMemory MCP is the sharpest case, because it is an actively promoted product occupying both the name and the local cross-client memory-server description.
 
 The project owner explicitly chose to retain the repository name `openmemory`. Before publishing packages or a signed application, Stage 0 must perform a fresh package, executable, domain, and legal-name review. The documentation should identify this repository by owner plus name where ambiguity matters.
+
+## Comparison summary
+
+This table is a navigation aid for the sections above, not an evaluation or a benchmark. Every entry describes what a project publicly claims as of this snapshot; nothing here was measured, and OpenMemory's own row describes a planning target rather than a shipped capability.
+
+| Project | Product category | Authoritative store | Retrieval approach | Privacy posture as described | Nearest overlap with OpenMemory |
+|---|---|---|---|---|---|
+| **OpenMemory (this project, planned)** | Memory service for coding assistants | Encrypted SQLCipher database; Markdown is a projection | Hybrid keyword, semantic, metadata, and graph over one local store | Local-only by default, encrypted at rest, named pipe rather than a listening port | — |
+| OpenHuman | Personal agent harness, orchestrator, and life memory | Scored Markdown Memory Tree in local SQLite, mirrored to Obsidian | Hierarchical tree traversal with scoring, plus compression before context | On-device encryption, privacy mode in the core, OS-keyring secrets, encrypted agent-to-agent links | Local-first, Markdown-and-database pairing, Obsidian surface, approval gate |
+| Mem0 OpenMemory MCP | Local memory server for MCP clients | Vendor-defined local store; self-hosted stack adds vector and graph services | Vector-first with optional graph | Local-first, with a hosted product alongside | Cross-client memory over MCP; the closest name and claim collision |
+| CaviraOSS/OpenMemory | Self-hosted memory platform | SQLite or PostgreSQL behind a server | Temporal and graph-oriented with explainable traces | Self-hosted rather than local-only; a listening service | Explainable retrieval, temporal relations, multiple access surfaces |
+| AndroidPoet/openmemory | Local memory server | SQLite | Vector and keyword fusion over extracted atomic facts | Local, but a localhost REST authority | Atomic extraction, contradiction supersession, rank fusion |
+| Graphiti / Zep | Temporal knowledge-graph framework | External graph database | Hybrid semantic, keyword, and graph with validity windows | Library or managed service; privacy is the operator's problem | Bitemporal facts, invalidation without erasure |
+| Graphify | Graph-building skill for coding assistants | Generated graph artifacts and exports | Graph traversal and topology clustering; no embeddings | Runs locally, but produces plain output files | Canonical entities, typed relations, provenance on every relation |
+| Karpathy LLM Wiki | A prompt and a discipline | Plaintext Markdown wiki over immutable raw sources | Agent reads and greps the wiki; knowledge compiled ahead of time | Whatever the operator's filesystem provides | Curated human-readable knowledge separated from raw evidence |
+| akitaonrails/ai-memory | Memory system for coding CLIs | Markdown in Git; SQLite with FTS5 is a derived index | Full-text search over a curated wiki and raw transcripts | Local files, no encryption boundary described | Cross-vendor handoff, lifecycle hooks, bounded retrieval packets |
+| memoirs | Local memory engine | SQLite with FTS5, optional SQLCipher | Hybrid, with bitemporal validity and provenance | Local, optionally encrypted | The closest match to OpenMemory's storage thesis |
+| Letta | Stateful agent runtime | Service-managed agent state | Message search plus editable memory blocks | Service or cloud oriented | Scoped memory blocks and explicit memory tools |
+| Cognee | Knowledge pipeline engine | Pluggable graph and vector stores | Graph plus vector with provenance and feedback | Deployable locally, platform shaped | Complementary graph, text, and semantic retrieval |
+| Hindsight | Agent memory with reflection | Service-managed | Recall informed by experience and outcomes | Service oriented | Reflections derived from accumulated evidence |
+| Memorix | Shared memory layer for coding agents | Local store behind MCP | Project, code, and Git context in one system | Local-first | One provider-neutral memory serving several clients |
+| memem | Claude Code plugin | Obsidian Markdown plus an FTS5 transcript index | Full-text search over transcripts, separate from curated notes | Local, with pre-write security scanning | Consent-gated transcript import and injection checks before durable writes |
+| projectmem | Local project memory | Plain files | Lookup of prior issues, attempts, and decisions | Local files | Failed attempts kept as first-class evidence; stale memories challenged, not deleted |
+| Microsoft SkillOpt | Skill-optimization research system | Skill documents as trainable state | Held-out evaluation rather than user retrieval | Research setting | Staged proposals, rejected-edit history, bounded reviewable updates |
+| Hermes Agent | Agent with a compact memory split | Markdown memory files plus searchable session history | Small always-on packet with deeper history searchable | Local or provider-backed, depending on configuration | Bounded working packet; durable profile separated from project and task memory |
+
+Three distinctions separate OpenMemory from every row above, and they are the ones the staged gates have to prove:
+
+1. **Encrypted evidence with a readable projection.** Most projects choose either plaintext Markdown as the truth or an opaque index as the truth. OpenMemory keeps complete history encrypted and authoritative, and projects only selected, editable knowledge into Markdown.
+2. **Authority is a product feature.** Extraction, reflection, inference, and imported evidence are all provisional here. Promotion, conflict review, and supersession are user-facing workflows rather than implementation details, and generated content never silently outranks an approved memory.
+3. **Provider neutrality is enforced, not incidental.** Client identity survives only in encrypted private provenance. No durable memory, ranking signal, or report is labelled as belonging to the assistant that happened to capture it.
+
+The corresponding honest weaknesses are equally clear at this stage: OpenMemory has no implementation, no benchmark position, one target operating system, a smaller integration surface than any funded competitor, and a name that at least four public projects already use.
 
 ## Resulting OpenMemory position
 
