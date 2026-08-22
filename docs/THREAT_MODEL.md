@@ -165,6 +165,7 @@ Every verification class required by [DATA_AND_PRIVACY.md](DATA_AND_PRIVACY.md),
 
 | Verification class | Threats |
 |---|---|
+| database and backup confidentiality at rest | `THR-001`, `THR-002` |
 | Windows key scoping and recovery-key exercises | `THR-003`, `THR-004` |
 | named-pipe client authorization and local impersonation attempts | `THR-005`, `THR-006` |
 | trusted-human confirmation tests against model-generated requests, replay, expired confirmations, capability escalation, and same-user spoofing | `THR-007`, `THR-008`, `THR-009`, `THR-010`, `THR-011` |
