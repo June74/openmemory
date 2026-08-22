@@ -202,4 +202,4 @@ Before public release, verification must include:
 - portable export warnings and synchronized-vault detection;
 - old-vault import followed by non-destructive deletion review.
 
-The repository-grounded threat model will be written during Stage 0, after the actual code structure and trust boundaries exist.
+The repository-grounded threat model was written during Stage 0 Wave D, after the code structure and trust boundaries existed to ground it: see [Threat model](THREAT_MODEL.md). It maps every verification class listed above onto the threats that make it necessary, and a test fails the build if a class listed here has no covering threat. No test for any of these classes has been written yet; Stage 0 modelled what can go wrong and froze what must be true, and the [security contracts](contracts/README.md) record which contract owes evidence for which class.

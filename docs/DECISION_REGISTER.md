@@ -157,7 +157,7 @@ These items are intentionally left for Stage 0 design or Stage 1 feasibility tes
 | F-007 | Exact free or paid signing provider and attestation implementation | Threat model, available open-source signing programs, and explicit approval before any paid service; the staged signing policy remains fixed. |
 | F-008 | Exact Obsidian community-submission date and review checklist | Plugin maturity, privacy review, and current community-directory requirements; sideload-then-submit remains fixed. |
 | F-009 | Quantitative retrieval, indexing, and startup performance targets | Stage 1 baselines on representative personal repositories and histories. |
-| F-010 | Repository-grounded threat model and subsystem implementation plans | Create after the repository structure and executable trust boundaries exist. |
+| F-010 | ~~Repository-grounded threat model and subsystem implementation plans~~ **Discharged 2026-08-21** | Created in Stage 0 Wave D, after the repository structure and executable trust boundaries existed: [Threat model](THREAT_MODEL.md). Subsystem implementation plans remain per-stage work, written as each stage is scoped. The entry is kept rather than deleted; identifiers are never reused. |
 | F-011 | Exact user-presence mechanism satisfying `SC-CONF-007`, and its resistance to same-user process spoofing | Decide during Stage 1's Windows packaging and client-connection proof, against observed Windows behavior rather than assumed behavior. The requirement the mechanism must satisfy is frozen; only the mechanism is deferred. |
 
 ## 10. Source-choice traceability
