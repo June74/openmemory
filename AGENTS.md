@@ -2,7 +2,11 @@
 
 ## Current repository status
 
-This repository is a **documentation-only planning baseline**. OpenMemory implementation has not begun. Until this baseline is published and the user explicitly authorizes Stage 0 work, do not add application code, generated scaffolding, dependencies, installers, database migrations, or client plugins. Stage 0 is complete only when its own exit gate passes.
+**Stage 0 (program foundation) is complete; no product capability exists.** Stage 0 delivered repository governance and records, pinned toolchains, the solution's project boundaries and dependency graph, continuous integration with branch protection, a repository-grounded [threat model](docs/THREAT_MODEL.md), four frozen [security contracts](docs/contracts/README.md), [deterministic test fixtures](docs/TEST_FIXTURES.md), and the [launch checklist](docs/LAUNCH_CHECKLIST.md). The exit evidence is recorded in [`docs/operations/STAGE0_EXIT.md`](docs/operations/STAGE0_EXIT.md).
+
+What exists under `src/` is boundaries, not behavior: project files, a dependency graph two edges of which are deliberately absent so the compiler enforces architecture, and stub entry points. No memory logic, database access, MCP handling, or adapter implementation exists anywhere in this repository.
+
+**Product code still requires an approved specification and implementation plan before it is written.** The bar has moved from "no application code at all" to "no product behavior without an approved plan" — it has not been lifted. Do not add memory logic, storage, protocol handling, installers, migrations, or client plugins outside an approved Stage 1 or later plan with a named owner and stated acceptance tests. The four frozen security contracts bind any code that touches their subject matter; a contract rule changes only through a decision-register entry, never through an edit made in passing.
 
 These instructions apply to human and AI contributors throughout the repository. A more specific `AGENTS.md` may add constraints for its subtree but may not weaken the privacy, safety, review, or verification rules here.
 
