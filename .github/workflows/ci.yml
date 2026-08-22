@@ -42,7 +42,11 @@ jobs:
       - name: Assert minimum discovered test count
         shell: pwsh
         run: |
-          $expected = 4
+          # 17 = 1 ContractVersions + 3 FixtureManifest + 5 SecurityContractDocument
+          #    + 5 ThreatModelCoverage + 2 Service.ProjectReference + 1 Storage.ProjectReference.
+          # Raise this with the real count whenever tests are added; a stale floor lets
+          # every test added since it was set be deleted without CI noticing.
+          $expected = 17
           $listed = dotnet test OpenMemory.sln --no-build --nologo --list-tests
           $count = ($listed | Where-Object { $_ -match '^\s+\S+\.\S+\.\S+$' }).Count
           Write-Host "Discovered $count tests (floor $expected)"
