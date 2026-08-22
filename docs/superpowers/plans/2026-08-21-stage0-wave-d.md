@@ -17,7 +17,8 @@ Every task's requirements implicitly include this section.
 - **No product behavior.** No `src/**` file may be created or modified. The only new code lives under `tests/`. A task that appears to require a `src/` change has hit a plan error — stop and report it rather than working around it.
 - **Repository:** `June74/openmemory`. **Branch:** `claude/openmemory-continuation-zu0f7j`. Never commit to `main`.
 - **DCO required.** Every commit uses `git commit -s`.
-- **Never write a secret value or secret-shaped content** into any file, including examples, placeholders, fixtures, and test data. This is not a style preference: Wave C's `secret-scan` job runs gitleaks over the tree and will fail the build. Secret-detection corpora are generated inside the test at run time (spec D-4), never committed.
+- **Never write a secret value or secret-shaped content** into any file, including examples, placeholders, fixtures, and test data. This is not a style preference: Wave C's `secret-scan` job runs gitleaks over the tree and will fail the build.
+- **The local `grep` for secret-shaped content is a tripwire, not evidence.** gitleaks in CI is the detector with maintained rules; the local grep exists only to save a CI cycle. A hit means *look at this*; silence does not mean the tree is clean. The pattern originally used here also matched the ordinary word "task-snapshot" — a hand-rolled regex is fine as a tripwire and dangerous as a guarantee. Secret-detection corpora are generated inside the test at run time (spec D-4), never committed.
 - **Apache-2.0 SPDX header on every new `.cs` file**, exactly:
   ```
   // Copyright 2026 OpenMemory contributors
@@ -272,7 +273,7 @@ Requirements for the content:
 ```bash
 cd /home/user/openmemory && bash tools/check-links.sh
 grep -oh 'SC-[A-Z]*-[0-9][0-9][0-9]' docs/contracts/*.md | sort -u | wc -l
-grep -rniE '(sk-[A-Za-z0-9]{8,}|ghp_[A-Za-z0-9]{8,}|-----BEGIN)' docs/contracts/ && echo FAIL || echo "PASS: no secret-shaped content"
+grep -rniE '(\bsk-[A-Za-z0-9]{16,}|\bghp_[A-Za-z0-9]{8,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|\bAKIA[0-9A-Z]{16})' docs/contracts/ && echo "LOOK AT THIS" || echo "no hits"
 ```
 
 Expected: links exit `0`; the identifier count is exactly `34` (8 + 9 + 9 + 8); no secret-shaped content.
