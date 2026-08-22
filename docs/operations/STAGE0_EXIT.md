@@ -24,11 +24,11 @@ This document records the evidence for each clause of that gate and for each Sta
 
 | Clause | Evidence | Verification command | Discharged |
 |---|---|---|---|
-| A clean Windows build | The CI `build-and-test` job on `windows-latest` restores, builds with `TreatWarningsAsErrors`, and tests | CI run on the integration commit | **Pending** until §6 records the run |
-| …produces a documentation/dev artifact | The CI `artifact` job publishes `Service`, `Cli`, and `McpBridge`, zips them, writes `openmemory-dev.zip.sha256`, and uploads the archive with the SBOM | CI `artifact` job; the digest was downloaded and recomputed during Wave C | Yes, exercised in Wave C; re-run recorded in §6 |
-| CI checks pass | Six required checks - `build-and-test`, `plugin`, `secret-scan`, `dependency-review`, `docs`, `artifact` | CI run whose `headSha` matches the branch tip | **Pending** until §6 records the run |
-| Security checks pass | gitleaks over the tree in `secret-scan`; `dependency-review` on pull requests; native GitHub secret scanning and push protection enabled | CI run; repository security settings | **Pending** for this branch's run; settings verified in Wave C, with one limitation in §4 |
-| Contracts approved | Four frozen security contracts under [`docs/contracts/`](../contracts/README.md), 34 rules, each traced to approved text or a decision; contract version integers in `ContractVersions` | `SecurityContractDocumentTests`; `ContractVersionsTests` | Documents complete; the guarding tests are **pending** their first CI execution |
+| A clean Windows build | The CI `build-and-test` job on `windows-latest` verified formatting, restored, built with `TreatWarningsAsErrors`, and ran 17 tests | Run `32592883259`, §6 | Yes |
+| …produces a documentation/dev artifact | The CI `artifact` job published `Service`, `Cli`, and `McpBridge`, zipped them, wrote `openmemory-dev.zip.sha256`, and uploaded the archive with the SBOM | Run `32592883259`; the digest was additionally downloaded and recomputed in Wave C | Yes |
+| CI checks pass | Five jobs succeeded; `dependency-review` is pull-request-only and correctly skipped, which GitHub counts as passing | Run `32592883259`, §6 | Yes |
+| Security checks pass | `secret-scan` (gitleaks over repository history) succeeded; native secret scanning and push protection enabled in Wave C | Run `32592883259`, §6 | Yes, with the §4 limitation |
+| Contracts approved | Four frozen security contracts under [`docs/contracts/`](../contracts/README.md), 34 rules, each traced to approved text or a decision; contract version integers in `ContractVersions` | `SecurityContractDocumentTests` and `ContractVersionsTests`, both passing in run `32592883259` | Yes |
 | Repository ownership approved | `CODEOWNERS`, `CONTRIBUTING.md` with DCO, `SECURITY.md`, issue templates, PR template, branch protection on `main` with `strict: true` and `enforce_admins: true` | [`.github/branch-protection.md`](../../.github/branch-protection.md); branch protection API | Yes, enabled in Wave C |
 | No product capability claimed | No `src/**` file created or modified in Wave D; `src/` holds project files, a dependency graph, and stub entry points only | `git diff --name-only main...HEAD -- src/` returns nothing | Yes |
 
@@ -68,12 +68,31 @@ Recorded so that Stage 1 does not mistake absence for oversight:
 
 ## 6. Verification run
 
-This section is written from the actual continuous-integration run on the Wave D integration commit and is the evidence the **Pending** rows in §2 refer to. Until it names a run and a commit, Stage 0 is not closed - a stage does not exit on the strength of a plan to verify it.
+Written from the actual continuous-integration runs, not from an intention to run them.
 
 | Item | Value |
 |---|---|
-| Integration commit | *to be recorded* |
-| Workflow run | *to be recorded* |
-| `headSha` matches branch tip | *to be recorded* |
-| Six jobs green | *to be recorded* |
-| Deliberate-failure demonstration | *to be recorded* - the three document-agreement guards are proved able to fail before being trusted |
+| Integration commit | `bfe4f62` |
+| Green run | [`32592883259`](https://github.com/June74/openmemory/actions/runs/32592883259), `headSha` `bfe4f62`, matching the branch tip |
+| Jobs | `build-and-test`, `plugin`, `secret-scan`, `docs`, `artifact` succeeded; `dependency-review` skipped, being pull-request-only |
+| Discovered tests | 17, against a floor of 17 |
+| Product behavior added | None. `git diff --name-only main...HEAD -- src/` returns nothing |
+| DCO | All 12 commits carry `Signed-off-by` |
+| Links | 44 files, 275 internal links, 0 broken |
+
+### The deliberate-failure demonstration
+
+The three document-agreement guards were proved able to fail before being trusted. No .NET SDK exists in the authoring environment (`SET-20260821-006`), so this ran on CI: commit `ce68605` broke three things at once — one byte of a fixture, a duplicated rule identifier, and a removed verification-class row — and was reverted in `bfe4f62`.
+
+Run [`32592671150`](https://github.com/June74/openmemory/actions/runs/32592671150) failed with five failures across the three guard classes, each naming the offending file:
+
+| Test | Caught |
+|---|---|
+| `FixtureManifestTests.EveryFixtureFileMatchesItsManifestChecksum` | The changed byte, reporting computed and recorded digests and the CRLF possibility |
+| `SecurityContractDocumentTests.NoRuleIdentifierIsDeclaredByMoreThanOneContract` | The duplicated identifier |
+| `ThreatModelCoverageTests.EveryRequiredVerificationClassAppearsInTheThreatModelCoverageTable` | The removed verification class, by name |
+| `ThreatModelCoverageTests.EveryContractRuleTheThreatModelCitesExistsInTheContracts` | **Unplanned.** Renaming `SC-CAP-004` in the contract left the threat model citing a rule no contract declares — the binding assertion catching a consequence of the mutation in a different document from the one that was edited, which is the drift it exists to prevent |
+
+That run also reported `Failed: 5, Passed: 9, Total: 14` for `Contracts.Tests`, which with the 3 tests in the other two projects confirms the floor of 17 counts what it claims to count.
+
+Each guard has now been observed failing on a known-bad input and passing on a known-good one. That is the difference between a guard and a decoration, and it is the standard every later stage's checks are expected to meet.
