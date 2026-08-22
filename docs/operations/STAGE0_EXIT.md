@@ -79,6 +79,9 @@ Written from the actual continuous-integration runs, not from an intention to ru
 | Product behavior added | None. `git diff --name-only main...HEAD -- src/` returns nothing |
 | DCO | All 12 commits carry `Signed-off-by` |
 | Links | 44 files, 275 internal links, 0 broken |
+| Record commit | `1462c35`, which added this section, verified green by run [`32593102125`](https://github.com/June74/openmemory/actions/runs/32593102125) |
+
+A record of verification cannot verify the commit that writes it: each entry above names the run covering the tree it describes, and the row recording *that* run necessarily lands one commit later. The regress stops here deliberately. Run `32593102125` covers `1462c35`, the commit carrying every deliverable of this wave; the only change after it is this paragraph and the row above it, which alter no code, no contract, and no fixture. A reviewer wanting the tip verified end to end can dispatch the workflow against it, which is one click and needs no pull request.
 
 ### The deliberate-failure demonstration
 
